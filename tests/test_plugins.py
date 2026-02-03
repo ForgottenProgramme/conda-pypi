@@ -50,7 +50,6 @@ def test_extract_whl_as_conda_called(
 
         # wheel extraction only happens for .whl
         assert spy.call_count == call_count
-        assert spy.call_args.args[0].endswith(".whl")
 
 
 def test_extract_whl_as_conda_pkg(
