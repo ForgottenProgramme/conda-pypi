@@ -1,5 +1,6 @@
 from conda.testing.fixtures import CondaCLIFixture, TmpEnvFixture
 from conda.base.context import context
+from conda_pypi import plugin
 from pytest_mock import MockerFixture
 from conda_pypi.package_extractor import extract_whl
 import pytest
@@ -16,6 +17,7 @@ CONDA_URL = "https://repo.anaconda.com/pkgs/main/osx-arm64/boltons-25.0.0-py314h
         pytest.param(WHL_HTTP_URL, 1, id=".whl url"),
         pytest.param("{file}", 1, id=".whl file"),
         pytest.param("file:///{file}", 1, id=".whl file url"),
+        pytest.param(CONDA_URL, 0, id=".conda url"),
     ],
 )
 def test_extract_whl_as_conda_called(
@@ -39,8 +41,8 @@ def test_extract_whl_as_conda_called(
             return_value=("3.10", str(tmp_path)),
         )
 
-        # spy on extract_package to check if called with ".whl" file
-        spy = mocker.spy(context.plugin_manager, "extract_package")
+        # spy on the wheel extractor function in the plugin module
+        spy = mocker.spy(plugin, "extract_whl_as_conda_pkg")
 
         # install package
         _, _, err = conda_cli("install", f"--prefix={prefix}", package)
