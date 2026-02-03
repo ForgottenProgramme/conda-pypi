@@ -57,3 +57,4 @@ def test_extract_whl_as_conda_pkg(
     tmp_path: Path,
 ):
     extract_whl.extract_whl_as_conda_pkg(pypi_demo_package_wheel_path, tmp_path)
+    assert (tmp_path / "info" / "index.json").is_file()
