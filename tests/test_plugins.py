@@ -2,7 +2,7 @@ from conda.testing.fixtures import CondaCLIFixture, TmpEnvFixture
 from conda.base.context import context
 from conda_pypi import plugin
 from pytest_mock import MockerFixture
-from conda_pypi.package_extractor import extract_whl
+from conda_pypi.package_extractors import whl
 import pytest
 from pathlib import Path
 
@@ -56,5 +56,5 @@ def test_extract_whl_as_conda_pkg(
     pypi_demo_package_wheel_path: Path,
     tmp_path: Path,
 ):
-    extract_whl.extract_whl_as_conda_pkg(pypi_demo_package_wheel_path, tmp_path)
+    whl.extract_whl_as_conda_pkg(pypi_demo_package_wheel_path, tmp_path)
     assert (tmp_path / "info" / "index.json").is_file()
