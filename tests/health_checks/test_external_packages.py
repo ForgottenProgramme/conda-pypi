@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from conda_pypi.health_check.external_packages import (
+from conda_pypi.health_checks.external_packages import (
     find_external_packages,
 )
 
