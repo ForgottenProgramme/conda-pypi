@@ -90,13 +90,3 @@ def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> i
     confirm("Reinstall these packages with conda?")
 
     return reinstall_packages(args, safe_packages, force_reinstall=True)
-
-
-@hookimpl
-def conda_health_checks() -> Iterable[CondaHealthCheck]:
-    yield CondaHealthCheck(
-        name="external-packages",
-        action=print_external_packages,
-        fixer=migrate_to_pypi,
-        summary="List packages not installed by conda.",
-    )
