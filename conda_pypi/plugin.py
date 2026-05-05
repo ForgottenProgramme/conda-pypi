@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from conda.plugins import hookimpl
-from conda.plugins.types import CondaPackageExtractor, CondaPostCommand, CondaSubcommand
+from conda.plugins.types import CondaPackageExtractor, CondaPostCommand, CondaSubcommand, CondaHealthCheck
 
 from conda_pypi import cli, post_command
 from conda_pypi.main import ensure_target_env_has_externally_managed
 from conda_pypi.package_extractors.whl import extract_whl_as_conda_pkg
+from conda_pypi.health_check.external_packages import print_external_packages, migrate_to_pypi
 
 
 @hookimpl
@@ -38,4 +39,14 @@ def conda_package_extractors():
         name="wheel-package",
         extensions=[".whl"],
         extract=extract_whl_as_conda_pkg,
+    )
+
+
+@hookimpl
+def conda_health_checks():
+    yield CondaHealthCheck(
+        name="external-packages",
+        action=print_external_packages,
+        fixer=migrate_to_pypi,
+        summary="List packages not installed by conda.",
     )
