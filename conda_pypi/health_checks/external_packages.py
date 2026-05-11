@@ -15,6 +15,7 @@ from conda.cli.install import reinstall_packages
 from conda.core.prefix_data import PrefixData
 from conda.plugins import hookimpl
 from conda.plugins.types import CondaHealthCheck
+from conda.api import SubdirData
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -42,12 +43,8 @@ def print_external_packages(prefix: str, verbose: bool) -> None:
 
 
 def conda_has_package(name: str) -> bool:
-    result = subprocess.run(
-        ["conda", "search", name, "--json"],
-        capture_output=True,
-        text=True,
-    )
-    return "error" not in result.stdout and result.returncode == 0
+    result = SubdirData.query_all(name)
+    return bool(result)
 
 
 def build_migration_plan(packages):
@@ -57,9 +54,14 @@ def build_migration_plan(packages):
     for pkg in packages:
         name = pkg.name.replace("_", "-")
 
+        conda_name = pypi_to_conda_name(pkg.name)
+        if conda_name != name:
+            print(f"Note: '{name}' will be reinstalled as '{conda_name}' from conda channels.\n")
+    
+
         # check if conda can install it
-        if conda_has_package(name):
-            safe.append(name)
+        if conda_has_package(conda_name):
+            safe.append(conda_name)
         else:
             external_only.append(name)
 
@@ -90,11 +92,7 @@ def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> i
 
     print()
 
-    for name in safe_packages:
-        conda_name = pypi_to_conda_name(name)
-        if conda_name != name:
-            print(f"Note: '{name}' will be reinstalled as '{conda_name}' from conda channels.\n")
-    
+
     confirm("Reinstall these packages with conda?")
 
     return reinstall_packages(args, safe_packages, force_reinstall=True)
