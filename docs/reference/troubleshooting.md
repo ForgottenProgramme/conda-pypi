@@ -121,7 +121,7 @@ conda pypi install package-name
 ping pypi.org
 
 # Try with verbose output to see connection details
-conda -v pip install package-name
+conda -v pypi install package-name
 
 # Check conda's network configuration
 conda config --show channels
@@ -135,16 +135,16 @@ For detailed debugging information:
 
 ```bash
 # Basic verbose output
-conda -v pip install package-name
+conda -v pypi install package-name
 
 # INFO level logging (repeat -v twice)
-conda -vv pip install package-name
+conda -vv pypi install package-name
 
 # DEBUG level logging (repeat -v three times) - most useful for troubleshooting
-conda -vvv pip install package-name
+conda -vvv pypi install package-name
 
 # TRACE level logging (repeat -v four times) - maximum detail
-conda -vvvv pip install package-name
+conda -vvvv pypi install package-name
 ```
 
 ## When to Seek Further Help
@@ -153,6 +153,6 @@ If you encounter issues not covered here:
 
 1. **Check the version**: Ensure you're using the latest version of `conda-pypi`
 2. **Search existing issues**: Check the [GitHub repository](https://github.com/conda/conda-pypi) for similar problems
-3. **Report issues**: When reporting issues please to include all the relevant details
+3. **Report issues**: When reporting issues, please include all the relevant details
 
 Remember that `conda-pypi` is still in early development, so feedback about unexpected behavior is valuable for improving the tool.
