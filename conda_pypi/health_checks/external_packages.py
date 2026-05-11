@@ -6,8 +6,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from conda_pypi.name_mapping import pypi_to_conda_name
+from conda_pypi.name_mapping import pypi_to_conda_name, conda_to_pypi_name
 
+from conda.env.pip_util import pip_subprocess
 from conda.common.constants import NULL
 from conda.base.constants import OK_MARK, X_MARK
 from conda.base.context import context
@@ -97,5 +98,19 @@ def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> i
     args.file = []
     args.repodata_fns = ("repodata.json",)
     args.update_modifier = NULL
+
+    pypi_pkgs=[]
+    for pkgs in safe_packages:
+        pypi_name=conda_to_pypi_name(pkgs)
+        pypi_pkgs.append(pypi_name)
+
+    for package in pypi_pkgs:
+        stdout, stderr = pip_subprocess(["uninstall", package, "-y"], prefix, cwd=None)
+
+        print(f"Uninstalling {package}...")
+        print(stdout)
+
+        if stderr:
+            print("Error:", stderr)
 
     return reinstall_packages(args, safe_packages, force_reinstall=True)
