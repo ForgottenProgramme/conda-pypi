@@ -4,11 +4,11 @@
 
 from __future__ import annotations
 
-import subprocess
 from typing import TYPE_CHECKING
 
 from conda_pypi.name_mapping import pypi_to_conda_name
 
+from conda.common.constants import NULL
 from conda.base.constants import OK_MARK, X_MARK
 from conda.base.context import context
 from conda.cli.install import reinstall_packages
@@ -91,8 +91,11 @@ def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> i
         print(f"  {name}")
 
     print()
-
-
     confirm("Reinstall these packages with conda?")
+
+    args.use_local = False
+    args.file = []
+    args.repodata_fns = ("repodata.json",)
+    args.update_modifier = NULL
 
     return reinstall_packages(args, safe_packages, force_reinstall=True)
