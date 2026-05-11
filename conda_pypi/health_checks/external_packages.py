@@ -7,6 +7,8 @@ from __future__ import annotations
 import subprocess
 from typing import TYPE_CHECKING
 
+from conda_pypi.name_mapping import pypi_to_conda_name
+
 from conda.base.constants import OK_MARK, X_MARK
 from conda.base.context import context
 from conda.cli.install import reinstall_packages
@@ -87,6 +89,12 @@ def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> i
         print(f"  {name}")
 
     print()
+
+    for name in safe_packages:
+        conda_name = pypi_to_conda_name(name)
+        if conda_name != name:
+            print(f"Note: '{name}' will be reinstalled as '{conda_name}' from conda channels.\n")
+    
     confirm("Reinstall these packages with conda?")
 
     return reinstall_packages(args, safe_packages, force_reinstall=True)
