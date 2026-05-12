@@ -49,8 +49,9 @@ def conda_has_package(name: str) -> bool:
 
 
 def build_migration_plan(packages):
-    safe = []
+    safe_pkgs_conda_names = []
     external_only = []
+    safe_pkgs_pypi_names=[]
 
     for pkg in packages:
         name = pkg.name.replace("_", "-")
@@ -62,11 +63,12 @@ def build_migration_plan(packages):
 
         # check if conda can install it
         if conda_has_package(conda_name):
-            safe.append(conda_name)
+            safe_pkgs_conda_names.append(conda_name)
+            safe_pkgs_pypi_names.append(name)
         else:
             external_only.append(name)
 
-    return safe, external_only
+    return safe_pkgs_conda_names, external_only, safe_pkgs_pypi_names
 
 
 def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> int:
@@ -81,30 +83,20 @@ def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> i
         print("No external packages found.")
         return 0
 
-    safe_packages, external_only = build_migration_plan(external_packages)
+    safe_pkgs_conda_names, external_only, safe_pkgs_pypi_names = build_migration_plan(external_packages)
 
-    if not safe_packages:
+    if not safe_pkgs_conda_names:
         print("No safe packages to migrate.")
         return 0
 
-    print(f"Found {len(safe_packages)} package(s) safe to migrate:")
-    for name in sorted(safe_packages):
+    print(f"Found {len(safe_pkgs_conda_names)} package(s) safe to migrate:")
+    for name in sorted(safe_pkgs_conda_names):
         print(f"  {name}")
 
     print()
     confirm("Reinstall these packages with conda?")
 
-    args.use_local = False
-    args.file = []
-    args.repodata_fns = ("repodata.json",)
-    args.update_modifier = NULL
-
-    pypi_pkgs=[]
-    for pkgs in safe_packages:
-        pypi_name=conda_to_pypi_name(pkgs)
-        pypi_pkgs.append(pypi_name)
-
-    for package in pypi_pkgs:
+    for package in safe_pkgs_pypi_names:
         stdout, stderr = pip_subprocess(["uninstall", package, "-y"], prefix, cwd=None)
 
         print(f"Uninstalling {package}...")
@@ -113,4 +105,10 @@ def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> i
         if stderr:
             print("Error:", stderr)
 
-    return reinstall_packages(args, safe_packages, force_reinstall=True)
+    # args required by reinstall_packages (defined in conda)
+    args.use_local = False
+    args.file = []
+    args.repodata_fns = ("repodata.json",)
+    args.update_modifier = NULL
+
+    return reinstall_packages(args, safe_pkgs_conda_names, force_reinstall=True)
