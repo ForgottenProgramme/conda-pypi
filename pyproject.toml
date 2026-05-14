@@ -27,7 +27,6 @@ classifiers = [
 requires-python = ">=3.10"
 dependencies = [
   # "conda >=25.11.0",
-  # "conda-rattler-solver >=0.0.5",
   "build",
   "conda-index >=0.11.0",
   "conda-package-streaming >=0.11",
@@ -55,7 +54,6 @@ python = ">=3.10"
 conda = ">=26.1"
 conda-index = ">=0.11.0"
 conda-package-streaming = ">=0.11"
-conda-rattler-solver = ">=0.0.6"
 packaging = "*"
 pip = "*"
 unearth = "*"
@@ -117,6 +115,8 @@ pyyaml = "*"
 zstandard = "*"  # Will be in stdlib as compression.zstd in Python 3.14+
 # Build backend for flit tests
 flit = "*"
+# Solver for wheel-augmented repodata tests
+conda-rattler-solver = ">=0.0.6"
 
 [tool.pixi.feature.py310.dependencies]
 python = "3.10.*"

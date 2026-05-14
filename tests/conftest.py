@@ -95,7 +95,11 @@ def conda_local_channel():
 
 @pytest.fixture()
 def with_rattler_solver(monkeypatch):
-    """Clear the plugin manager's solver backend cache and set rattler as the solver."""
+    """Set rattler as the solver for tests that need wheel-augmented repodata."""
+    try:
+        import conda_rattler_solver  # noqa: F401
+    except ImportError:
+        pytest.skip("conda-rattler-solver not installed")
     context.plugin_manager.get_cached_solver_backend.cache_clear()
     monkeypatch.setenv("CONDA_SOLVER", "rattler")
     reset_context()
