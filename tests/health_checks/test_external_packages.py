@@ -3,8 +3,11 @@
 """Tests for external packages health check."""
 
 from __future__ import annotations
-
+import sys
 from typing import TYPE_CHECKING
+
+py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
+
 
 from conda_pypi.health_checks.external_packages import (
     find_external_packages,
@@ -19,9 +22,6 @@ if TYPE_CHECKING:
 def test_no_external_packages(tmp_env: TmpEnvFixture):
     with tmp_env() as prefix:
         assert find_external_packages(prefix) == []
-
-
-py_ver = "3.10"
 
 
 def test_external_packages(
