@@ -71,7 +71,7 @@ def build_migration_plan(packages):
     return safe_pkgs_conda_names, external_only, safe_pkgs_pypi_names
 
 
-def migrate_to_pypi(prefix: str, args: Namespace, confirm: ConfirmCallback) -> int:
+def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> int:
 
     if prefix == context.root_prefix:
         print("Cannot migrate packages in the base environment.")

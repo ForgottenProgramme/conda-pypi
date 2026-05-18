@@ -6,7 +6,7 @@ from conda.plugins.types import CondaPackageExtractor, CondaPostCommand, CondaSu
 from conda_pypi import cli, post_command
 from conda_pypi.main import notify_externally_managed_future
 from conda_pypi.package_extractors.whl import extract_whl_as_conda_pkg
-from conda_pypi.health_checks.external_packages import print_external_packages, migrate_to_pypi
+from conda_pypi.health_checks.external_packages import print_external_packages, migrate_to_conda
 
 
 @hookimpl
@@ -47,6 +47,6 @@ def conda_health_checks():
     yield CondaHealthCheck(
         name="external-packages",
         action=print_external_packages,
-        fixer=migrate_to_pypi,
+        fixer=migrate_to_conda,
         summary="List packages not installed by conda.",
     )
