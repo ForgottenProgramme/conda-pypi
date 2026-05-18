@@ -15,6 +15,7 @@ from conda.base.context import context
 from conda.cli.install import reinstall_packages
 from conda.core.prefix_data import PrefixData
 from conda.api import SubdirData
+from conda.models.records import PrefixRecord
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
     from conda.plugins.types import ConfirmCallback
 
 
-def find_external_packages(prefix: str) -> list[PrefixData]:
+def find_external_packages(prefix: str) -> list[PrefixRecord]:
     prefix_data = PrefixData(prefix, interoperability=True)
     external_packages = prefix_data.get_python_packages()
     return external_packages
