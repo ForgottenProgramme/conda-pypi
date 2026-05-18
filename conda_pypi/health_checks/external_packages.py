@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from conda_pypi.name_mapping import pypi_to_conda_name, conda_to_pypi_name
+from conda_pypi.name_mapping import pypi_to_conda_name
 
 from conda.env.pip_util import pip_subprocess
 from conda.common.constants import NULL
@@ -14,8 +14,6 @@ from conda.base.constants import OK_MARK, X_MARK
 from conda.base.context import context
 from conda.cli.install import reinstall_packages
 from conda.core.prefix_data import PrefixData
-from conda.plugins import hookimpl
-from conda.plugins.types import CondaHealthCheck
 from conda.api import SubdirData
 
 if TYPE_CHECKING:
