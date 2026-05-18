@@ -54,15 +54,12 @@ def build_migration_plan(packages):
 
     for pkg in packages:
         name = pkg.name.replace("_", "-")
-
         conda_name = pypi_to_conda_name(pkg.name)
-        if conda_name != name:
-            print(f"Note: '{name}' will be reinstalled as '{conda_name}' from conda channels.\n")
-    
-
+        
         # check if conda can install it
         if conda_has_package(conda_name):
             safe_pkgs_conda_names.append(conda_name)
+            print(f"Note: '{name}' will be reinstalled as '{conda_name}' from conda channels.\n")
             safe_pkgs_pypi_names.append(name)
         else:
             external_only.append(name)
