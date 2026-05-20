@@ -188,3 +188,34 @@ a `conda pypi` command on them.
 
 More details about this protection mechanism can be found at
 {ref}`externally-managed`.
+
+### Configuration settings
+
+`conda-pypi` exposes conda configuration settings that can be managed with
+`conda config`.
+
+#### `conda_pypi_pip_warning`
+
+By default, `conda-pypi` displays a warning when `pip` is detected in a conda
+environment. This warning reminds you that future updates will protect environments
+from using `pip` via the `EXTERNALLY-MANAGED` file defined by
+[PEP 668](https://peps.python.org/pep-0668/).
+
+To disable this warning:
+
+```bash
+conda config --set plugins.conda_pypi_pip_warning false
+```
+
+To re-enable it:
+
+```bash
+conda config --set plugins.conda_pypi_pip_warning true
+```
+
+You can also set this in your `.condarc` file:
+
+```yaml
+plugins:
+  conda_pypi_pip_warning: false
+```
