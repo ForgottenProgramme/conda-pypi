@@ -4,7 +4,12 @@
 
 from __future__ import annotations
 
+import os
+import sys
+
+from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest import result
 
 from conda_pypi.name_mapping import pypi_to_conda_name
 
@@ -15,7 +20,7 @@ from conda.base.context import context
 from conda.cli.install import reinstall_packages
 from conda.core.prefix_data import PrefixData
 from conda.api import SubdirData
-from conda.models.records import PrefixRecord
+from conda.models.records import PrefixRecord, PackageRecord
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -38,7 +43,7 @@ def print_external_packages(prefix: str, verbose: bool) -> None:
     else:
         print(f"{X_MARK} These packages are not installed by conda:\n")
         for package in external_packages:
-            print(package.name)
+            print(package.name, package.version)
         print("")
 
 
@@ -46,25 +51,32 @@ def conda_has_package(name: str) -> bool:
     result = SubdirData.query_all(name)
     return bool(result)
 
-
-def build_migration_plan(packages):
+def build_migration_plan(packages)->list:
     safe_pkgs_conda_names = []
-    external_only = []
-    safe_pkgs_pypi_names=[]
+    safe_pkgs_pypi=[]
 
     for pkg in packages:
-        name = pkg.name.replace("_", "-")
+        # name = pkg.name.replace("_", "-")
         conda_name = pypi_to_conda_name(pkg.name)
-        
+
         # check if conda can install it
         if conda_has_package(conda_name):
             safe_pkgs_conda_names.append(conda_name)
-            print(f"Note: '{name}' will be reinstalled as '{conda_name}' from conda channels.\n")
-            safe_pkgs_pypi_names.append(name)
-        else:
-            external_only.append(name)
+            if pkg.name != conda_name:
+                print(f"Note: '{pkg.name}' will be reinstalled as '{conda_name}' from conda channels.\n")
+            safe_pkgs_pypi.append(pkg)
 
-    return safe_pkgs_conda_names, external_only, safe_pkgs_pypi_names
+    return safe_pkgs_conda_names, safe_pkgs_pypi
+
+
+def clean_up_stale_files(prefix:str, pkg_name: str, pkg_version: str) -> None:
+    pyver= f'python{sys.version_info.major}.{sys.version_info.minor}'
+    site_packages=Path(prefix, "lib", pyver, "site-packages")
+    match= site_packages.glob(f"{pkg_name}-{pkg_version}-*.dist-info")
+    for path in match:
+        print(f"Removing stale file: {path}")
+        Path.delete(path)
+
 
 
 def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> int:
@@ -79,32 +91,23 @@ def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> 
         print("No external packages found.")
         return 0
 
-    safe_pkgs_conda_names, external_only, safe_pkgs_pypi_names = build_migration_plan(external_packages)
+    safe_pkgs_conda_names, safe_pkgs_pypi_names = build_migration_plan(external_packages)
 
     if not safe_pkgs_conda_names:
         print("No safe packages to migrate.")
         return 0
 
-    print(f"Found {len(safe_pkgs_conda_names)} package(s) safe to migrate:")
-    for name in sorted(safe_pkgs_conda_names):
-        print(f"  {name}")
-
     print()
     confirm("Reinstall these packages with conda?")
 
-    for package in safe_pkgs_pypi_names:
-        stdout, stderr = pip_subprocess(["uninstall", package, "-y"], prefix, cwd=None)
-
-        print(f"Uninstalling {package}...")
-        print(stdout)
-
-        if stderr:
-            print("Error:", stderr)
-
-    # args required by reinstall_packages (defined in conda)
     args.use_local = False
     args.file = []
     args.repodata_fns = ("repodata.json",)
     args.update_modifier = NULL
 
-    return reinstall_packages(args, safe_pkgs_conda_names, force_reinstall=True)
+    reinstall_packages(args, safe_pkgs_conda_names, force_reinstall=True)
+
+    for pkg in safe_pkgs_pypi_names:
+        clean_up_stale_files(prefix, pkg.name, pkg.version)
+
+    return
