@@ -89,7 +89,7 @@ def clean_up_stale_files(prefix:str, pkg_name: str, pkg_version: str) -> None:
         shutil.rmtree(path)
 
 
-def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> int:
+def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback)-> None:
 
     if prefix == context.root_prefix:
         print("Cannot migrate packages in the base environment.")
@@ -119,5 +119,3 @@ def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> 
 
     for pkg in safe_pkgs_pypi_names:
         clean_up_stale_files(prefix, pkg.name, pkg.version)
-
-    return
