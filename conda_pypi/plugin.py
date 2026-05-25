@@ -11,9 +11,9 @@ from conda.plugins.types import (
 )
 
 from conda_pypi import cli, post_command
+from conda_pypi.health_checks.external_packages import migrate_to_conda, print_external_packages
 from conda_pypi.main import ensure_target_env_has_externally_managed
 from conda_pypi.package_extractors.whl import extract_whl_as_conda_pkg
-from conda_pypi.health_checks.external_packages import print_external_packages, migrate_to_conda
 
 
 @hookimpl
@@ -57,6 +57,8 @@ def conda_health_checks():
         fixer=migrate_to_conda,
         summary="List packages not installed by conda.",
     )
+
+
 def conda_settings():
     yield CondaSetting(
         name="conda_pypi_pip_warning",

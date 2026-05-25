@@ -3,6 +3,7 @@
 """Tests for external packages health check."""
 
 from __future__ import annotations
+
 import sys
 from typing import TYPE_CHECKING
 
@@ -21,9 +22,7 @@ def test_no_external_packages(tmp_env: TmpEnvFixture):
         assert find_external_packages(prefix) == []
 
 
-def test_external_packages(
-    tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, wheelhouse: Path
-):
+def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, wheelhouse: Path):
     with tmp_env(f"python={py_ver}", "pip") as prefix:
         wheel_path = wheelhouse / "small_python_package-1.0.0-py3-none-any.whl"
         _, _, _ = pip_cli("install", wheel_path, prefix=prefix)
