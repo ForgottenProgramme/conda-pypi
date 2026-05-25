@@ -3,11 +3,11 @@ from __future__ import annotations
 from conda.common.configuration import PrimitiveParameter
 from conda.plugins import hookimpl
 from conda.plugins.types import (
+    CondaHealthCheck,
     CondaPackageExtractor,
     CondaPostCommand,
     CondaSetting,
     CondaSubcommand,
-    CondaHealthCheck,
 )
 
 from conda_pypi import cli, post_command
