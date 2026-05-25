@@ -7,6 +7,7 @@ from conda.plugins.types import (
     CondaPostCommand,
     CondaSetting,
     CondaSubcommand,
+    CondaHealthCheck,
 )
 
 from conda_pypi import cli, post_command

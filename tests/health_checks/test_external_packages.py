@@ -6,12 +6,9 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 
+from conda_pypi.health_checks.external_packages import find_external_packages
+
 py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
-
-
-from conda_pypi.health_checks.external_packages import (
-    find_external_packages,
-)
 
 if TYPE_CHECKING:
     from pathlib import Path
