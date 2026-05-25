@@ -5,25 +5,21 @@
 from __future__ import annotations
 
 import shutil
-
 from pathlib import Path
 from typing import TYPE_CHECKING
-from unittest import result
 
-from conda_pypi.name_mapping import pypi_to_conda_name
-
-from conda.env.pip_util import pip_subprocess
-from conda.common.constants import NULL
+from conda.api import SubdirData
 from conda.base.constants import OK_MARK, X_MARK
 from conda.base.context import context
 from conda.cli.install import reinstall_packages
+from conda.common.constants import NULL
 from conda.core.prefix_data import PrefixData
-from conda.api import SubdirData
-from conda.models.records import PrefixRecord, PackageRecord
+from conda.models.records import PrefixRecord
+
+from conda_pypi.name_mapping import pypi_to_conda_name
 
 if TYPE_CHECKING:
     from argparse import Namespace
-    from collections.abc import Iterable
 
     from conda.plugins.types import ConfirmCallback
 
@@ -53,10 +49,10 @@ def conda_has_package(name: str) -> bool:
     return bool(result)
 
 
-def build_migration_plan(packages)->list:
+def build_migration_plan(packages) -> list:
     """Determine which packages can be safely migrated to conda."""
     safe_pkgs_conda_names = []
-    safe_pkgs_pypi=[]
+    safe_pkgs_pypi = []
 
     for pkg in packages:
         # name = pkg.name.replace("_", "-")
@@ -66,15 +62,17 @@ def build_migration_plan(packages)->list:
         if conda_has_package(conda_name):
             safe_pkgs_conda_names.append(conda_name)
             if pkg.name != conda_name:
-                print(f"Note: '{pkg.name}' will be reinstalled as '{conda_name}' from conda channels.\n")
+                print(
+                    f"Note: '{pkg.name}' will be reinstalled as '{conda_name}' from conda channels.\n"
+                )
             safe_pkgs_pypi.append(pkg)
 
     return safe_pkgs_conda_names, safe_pkgs_pypi
 
 
-def clean_up_stale_files(prefix:str, pkg_name: str, pkg_version: str) -> None:
+def clean_up_stale_files(prefix: str, pkg_name: str, pkg_version: str) -> None:
     """Remove dist-info directories left behind by pip after migration."""
-    
+
     lib = Path(prefix) / "lib"
 
     site_packages_candidates = list(lib.glob("python*/site-packages"))
@@ -93,7 +91,7 @@ def clean_up_stale_files(prefix:str, pkg_name: str, pkg_version: str) -> None:
         shutil.rmtree(path)
 
 
-def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback)-> None:
+def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> None:
     """Migrate pip-installed packages to conda."""
 
     if prefix == context.root_prefix:
