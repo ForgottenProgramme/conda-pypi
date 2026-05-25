@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+from conda.common.configuration import PrimitiveParameter
 from conda.plugins import hookimpl
-from conda.plugins.types import CondaPackageExtractor, CondaPostCommand, CondaSubcommand, CondaHealthCheck
+from conda.plugins.types import (
+    CondaPackageExtractor,
+    CondaPostCommand,
+    CondaSetting,
+    CondaSubcommand,
+)
 
 from conda_pypi import cli, post_command
 from conda_pypi.main import ensure_target_env_has_externally_managed
@@ -49,4 +55,10 @@ def conda_health_checks():
         action=print_external_packages,
         fixer=migrate_to_conda,
         summary="List packages not installed by conda.",
+    )
+def conda_settings():
+    yield CondaSetting(
+        name="conda_pypi_pip_warning",
+        description="Enable or disable the warning about using pip in conda environents",
+        parameter=PrimitiveParameter(True),
     )

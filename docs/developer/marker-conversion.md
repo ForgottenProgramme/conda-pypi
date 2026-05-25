@@ -1,6 +1,6 @@
 # PEP 508 marker conversion
 
-This page documents how conda-pypi translates PEP 508 environment markers for repodata and for `.whl` → `.conda` conversion, and how that interacts with conda's `MatchSpec`. For stability expectations of wheel repodata and the `v3.whl` channel layout, see the Wheel channels section in {doc}`features`.
+This page documents how conda-pypi translates PEP 508 environment markers for repodata and for `.whl` → `.conda` conversion, and how that interacts with conda's `MatchSpec`. For stability expectations of wheel repodata and the `v3.whl` channel layout, see the Wheel channels section in {doc}`../features`.
 
 ## Context
 
@@ -62,4 +62,4 @@ Strings such as `pkg>=1[when="…"]` are not valid conda `MatchSpec` input, sinc
 
 conda-pypi may emit `[when="…"]` only in repodata for solvers that accept that shape (for example Rattler). Wheel → `.conda` `index.json` does not put `[when="…"]` on dependency strings, because conda does not support that syntax.
 
-If all marker conditions are untranslatable and there is no extra, the dependency is recorded without the `when`. For example, `cffi ; platform_machine == "x86_64"` becomes just `cffi` in the repodata, since `platform_machine` produces no fragment. Here we fallback to adding the dependecy unconditionally, which is more cautious than dropping it.
+If all marker conditions are untranslatable and there is no extra, the dependency is recorded without the `when`. For example, `cffi ; platform_machine == "x86_64"` becomes just `cffi` in the repodata, since `platform_machine` produces no fragment. Here we fallback to adding the dependency unconditionally, which is more cautious than dropping it.
