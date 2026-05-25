@@ -29,13 +29,14 @@ if TYPE_CHECKING:
 
 
 def find_external_packages(prefix: str) -> list[PrefixRecord]:
+    """Identify packages that were not installed by conda."""
     prefix_data = PrefixData(prefix, interoperability=True)
     external_packages = prefix_data.get_python_packages()
     return external_packages
 
 
 def print_external_packages(prefix: str, verbose: bool) -> None:
-
+    """Print packages not installed by conda."""
     external_packages = find_external_packages(prefix)
     if not external_packages:
         print(f"{OK_MARK} No external packages found.\n")
@@ -47,10 +48,13 @@ def print_external_packages(prefix: str, verbose: bool) -> None:
 
 
 def conda_has_package(name: str) -> bool:
+    """Check if a package with the given name exists in conda channels."""
     result = SubdirData.query_all(name)
     return bool(result)
 
+
 def build_migration_plan(packages)->list:
+    """Determine which packages can be safely migrated to conda."""
     safe_pkgs_conda_names = []
     safe_pkgs_pypi=[]
 
@@ -90,6 +94,7 @@ def clean_up_stale_files(prefix:str, pkg_name: str, pkg_version: str) -> None:
 
 
 def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback)-> None:
+    """Migrate pip-installed packages to conda."""
 
     if prefix == context.root_prefix:
         print("Cannot migrate packages in the base environment.")
