@@ -4,8 +4,7 @@
 
 from __future__ import annotations
 
-import os
-import sys
+import shutil
 
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -70,13 +69,24 @@ def build_migration_plan(packages)->list:
 
 
 def clean_up_stale_files(prefix:str, pkg_name: str, pkg_version: str) -> None:
-    pyver= f'python{sys.version_info.major}.{sys.version_info.minor}'
-    site_packages=Path(prefix, "lib", pyver, "site-packages")
-    match= site_packages.glob(f"{pkg_name}-{pkg_version}-*.dist-info")
-    for path in match:
-        print(f"Removing stale file: {path}")
-        Path.delete(path)
+    """Remove dist-info directories left behind by pip after migration."""
+    
+    lib = Path(prefix) / "lib"
 
+    site_packages_candidates = list(lib.glob("python*/site-packages"))
+    if not site_packages_candidates:
+        raise FileNotFoundError(f"No site-packages found in {lib}")
+
+    # there is only one site-packages directory in a conda env
+    site_packages_dir = site_packages_candidates[0]
+
+    # respect dist-info naming convention, replace dashes with underscores in package names
+    pkg_name = pkg_name.replace("-", "_")
+    pattern = f"{pkg_name}-{pkg_version}.dist-info"
+
+    for path in site_packages_dir.glob(pattern):
+        print(f"Removing stale file: {path}")
+        shutil.rmtree(path)
 
 
 def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> int:
