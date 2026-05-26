@@ -5,8 +5,9 @@
 from __future__ import annotations
 
 import shutil
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
+from unittest import result
 
 from conda.api import SubdirData
 from conda.base.constants import OK_MARK, X_MARK
@@ -70,28 +71,51 @@ def build_migration_plan(packages) -> list:
     return safe_pkgs_conda_names, safe_pkgs_pypi
 
 
-def clean_up_stale_files(prefix: str, pkg_name: str, pkg_version: str) -> None:
+def normalize_conda_file_paths(prefix_record: PrefixRecord)->tuple[PurePosixPath,...]:
+    """Return package file paths normalized to conda's manifest path style."""
+    return tuple(PurePosixPath(path.replace("\\", "/")) for path in prefix_record.files)
+
+def find_python_metadata_directories(prefix_record: PrefixRecord)-> set[PurePosixPath]:
+    """Identify dist-info and egg-info directories from a PrefixRecord."""
+    directories=set()
+
+    for file_path in normalize_conda_file_paths(prefix_record):
+        for path in (file_path, *file_path.parents):
+            if path.name.endswith((".dist-info", ".egg-info")):
+                directories.add(path)
+                break
+    return directories
+
+
+def clean_up_stale_files(prefix: str, prefix_record: PrefixRecord) -> None:
     """Remove dist-info directories left behind by pip after migration."""
 
-    lib = Path(prefix) / "lib"
+    print("Cleaning up stale metadata directories...")
+    prefix_path = Path(prefix)
+    prefix_data = PrefixData(prefix, interoperability=False).reload()
 
-    site_packages_candidates = list(lib.glob("python*/site-packages"))
-    if not site_packages_candidates:
-        raise FileNotFoundError(f"No site-packages found in {lib}")
+    conda_owned_paths = {
+        file_path
+        for record in prefix_data.iter_records()
+        for file_path in normalize_conda_file_paths(record)
+    }
 
-    # there is only one site-packages directory in a conda env
-    site_packages_dir = site_packages_candidates[0]
+    for metadata_dir in sorted(find_python_metadata_directories(prefix_record)):
+        is_conda_owned = any(
+            owned_path == metadata_dir or metadata_dir in owned_path.parents
+            for owned_path in conda_owned_paths
+        )
 
-    # respect dist-info naming convention, replace dashes with underscores in package names
-    pkg_name = pkg_name.replace("-", "_")
-    pattern = f"{pkg_name}-{pkg_version}.dist-info"
+        if is_conda_owned:
+            continue
 
-    for path in site_packages_dir.glob(pattern):
-        print(f"Removing stale file: {path}")
-        shutil.rmtree(path)
+        path = prefix_path.joinpath(*metadata_dir.parts)
+        if path.is_dir():
+            print(f"Removing stale metadata: {path}")
+            shutil.rmtree(path)
 
 
-def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> None:
+def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> int:
     """Migrate pip-installed packages to conda."""
 
     if prefix == context.root_prefix:
@@ -118,7 +142,17 @@ def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> 
     args.repodata_fns = ("repodata.json",)
     args.update_modifier = NULL
 
-    reinstall_packages(args, safe_pkgs_conda_names, force_reinstall=True)
+    try:
+        reinstall_packages(
+            args,
+            safe_pkgs_conda_names,
+            force_reinstall=True,
+        )
+    except Exception as e:
+        print(f"Failed to reinstall packages with conda: {e}")
+        return 1
 
     for pkg in safe_pkgs_pypi_names:
-        clean_up_stale_files(prefix, pkg.name, pkg.version)
+        clean_up_stale_files(prefix, pkg)
+
+    return 0
