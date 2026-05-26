@@ -58,7 +58,7 @@ def conda_health_checks():
         summary="List packages not installed by conda.",
     )
 
-
+@hookimpl
 def conda_settings():
     yield CondaSetting(
         name="conda_pypi_pip_warning",
