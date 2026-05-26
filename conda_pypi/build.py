@@ -18,6 +18,7 @@ import tempfile
 import zipfile
 from importlib.metadata import PathDistribution
 from pathlib import Path
+from typing import Iterable
 
 from build import ProjectBuilder
 from conda.common.compat import on_win
@@ -152,6 +153,7 @@ def build_conda(
     test_dir: Path | None = None,
     is_editable=False,
     pypi_to_conda_name_mapping: dict | None = None,
+    channels: Iterable[str] = (),
 ) -> Path:
     if not build_path.exists():
         build_path.mkdir()
@@ -175,7 +177,9 @@ def build_conda(
         # straightforward to write or find a WheelDistribution() to grab these
         # files from the wheel archive directly, instead of PathDistribution():
         metadata = CondaMetadata.from_distribution(
-            PathDistribution(dist_info), pypi_to_conda_name_mapping
+            PathDistribution(dist_info),
+            pypi_to_conda_name_mapping,
+            channels=channels,
         )
         record = metadata.package_record.to_index_json()
         file_id = f"{record['name']}-{record['version']}-{record['build']}"
@@ -276,6 +280,7 @@ def pypa_to_conda(
     output_path: Path | None = None,
     test_dir: Path | None = None,
     pypi_to_conda_name_mapping: dict | None = None,
+    channels: Iterable[str] = (),
 ):
     project = Path(project)
 
@@ -303,6 +308,7 @@ def pypa_to_conda(
             test_dir=test_dir,
             is_editable=distribution == "editable",
             pypi_to_conda_name_mapping=pypi_to_conda_name_mapping,
+            channels=channels,
         )
 
     return package_conda
