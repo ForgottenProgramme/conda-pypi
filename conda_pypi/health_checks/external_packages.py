@@ -7,7 +7,6 @@ from __future__ import annotations
 import shutil
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
-from unittest import result
 
 from conda.api import SubdirData
 from conda.base.constants import OK_MARK, X_MARK
@@ -71,13 +70,14 @@ def build_migration_plan(packages) -> list:
     return safe_pkgs_conda_names, safe_pkgs_pypi
 
 
-def normalize_conda_file_paths(prefix_record: PrefixRecord)->tuple[PurePosixPath,...]:
+def normalize_conda_file_paths(prefix_record: PrefixRecord) -> tuple[PurePosixPath, ...]:
     """Return package file paths normalized to conda's manifest path style."""
     return tuple(PurePosixPath(path.replace("\\", "/")) for path in prefix_record.files)
 
-def find_python_metadata_directories(prefix_record: PrefixRecord)-> set[PurePosixPath]:
+
+def find_python_metadata_directories(prefix_record: PrefixRecord) -> set[PurePosixPath]:
     """Identify dist-info and egg-info directories from a PrefixRecord."""
-    directories=set()
+    directories = set()
 
     for file_path in normalize_conda_file_paths(prefix_record):
         for path in (file_path, *file_path.parents):
