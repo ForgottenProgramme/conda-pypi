@@ -55,7 +55,6 @@ def build_migration_plan(packages) -> list:
     safe_pkgs_pypi = []
 
     for pkg in packages:
-        # name = pkg.name.replace("_", "-")
         conda_name = pypi_to_conda_name(pkg.name)
 
         # check if conda can install it
