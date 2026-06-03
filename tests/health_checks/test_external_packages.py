@@ -7,7 +7,7 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 
-from conda_pypi.health_checks.external_packages import find_external_packages
+from conda_pypi.health_checks.external_packages import find_external_packages, conda_has_package
 
 py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
 
@@ -31,3 +31,11 @@ def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, wheel
 
         assert packages != []
         assert "small-python-package" == packages[0].name
+
+def test_conda_has_package_existing_package():
+    """Test detection of packages available in conda channels."""
+    assert conda_has_package("numpy") is True
+
+def test_conda_has_package_nonexistent():
+    """Test that non-existent packages return False."""
+    assert conda_has_package("this_package_definitely_does_not_exist_xyz_123") is False
