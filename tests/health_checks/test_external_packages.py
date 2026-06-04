@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
-from pathlib import PurePosixPath
+from pathlib import PurePosixPath, Path
 
-from conda_pypi.health_checks.external_packages import find_external_packages, conda_has_package, print_external_packages, build_migration_plan, normalize_conda_file_paths, get_conda_owned_paths
+from conda_pypi.health_checks.external_packages import find_external_packages, conda_has_package, print_external_packages, build_migration_plan, normalize_conda_file_paths, get_conda_owned_paths, find_python_metadata_directories, clean_up_stale_files, clean_up_stale_files
 from conda.base.constants import OK_MARK, X_MARK
 
 
@@ -42,7 +42,7 @@ def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture):
 
 def test_conda_has_package():
     """Test detection of packages available in conda channels."""
-    assert conda_has_package("numpy") == True
+    assert conda_has_package("requests") == True
 
 
 def test_conda_does_not_have_package():
@@ -108,3 +108,25 @@ def test_get_conda_owned_paths(tmp_env: TmpEnvFixture):
         # verify structure is PurePosixPath
         assert all(isinstance(p, PurePosixPath) for p in owned_paths)
 
+
+def test_clean_up_stale_files_removes_unowned_metadata(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture):
+    """Test removal of stale metadata directories."""
+    with tmp_env(f"python={py_ver}", "pip") as prefix:
+        pip_cli("install", "requests", prefix=prefix)
+        
+        packages = find_external_packages(prefix)
+        conda_owned = get_conda_owned_paths(prefix)
+        
+        # Find metadata dirs before cleanup
+        metadata_dirs_before = []
+        for pkg in packages:
+            metadata_dirs_before.extend(find_python_metadata_directories(pkg))
+        
+        for pkg in packages:
+            clean_up_stale_files(prefix, pkg, conda_owned)
+        
+        # Verify those specific directories are gone
+        prefix_path = Path(prefix)
+        for metadata_dir in metadata_dirs_before:
+            path = prefix_path / metadata_dir
+            assert not path.exists(), f"Stale metadata directory {path} should have been removed"
