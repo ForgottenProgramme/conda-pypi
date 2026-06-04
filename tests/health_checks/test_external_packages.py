@@ -7,7 +7,12 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 from pathlib import PurePosixPath, Path
+from pytest import MonkeyPatch
+import pytest
 
+from tests.conftest import conda_local_channel
+
+from conda.base.context import reset_context
 from conda_pypi.health_checks.external_packages import find_external_packages, conda_has_package, print_external_packages, build_migration_plan, normalize_conda_file_paths, get_conda_owned_paths, find_python_metadata_directories, clean_up_stale_files, clean_up_stale_files
 from conda.base.constants import OK_MARK, X_MARK
 
@@ -39,15 +44,13 @@ def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture):
 
         assert "requests" in names
 
-
-def test_conda_has_package():
+@pytest.mark.parametrize("package_name, expected", [("requests", True), ("this_package_definitely_does_not_exist_xyz_123", False),],)
+def test_conda_has_package(conda_local_channel, monkeypatch: MonkeyPatch, package_name, expected):
     """Test detection of packages available in conda channels."""
-    assert conda_has_package("requests") == True
+    monkeypatch.setenv("context.channels", conda_local_channel)
+    reset_context()
+    assert conda_has_package(package_name) == expected
 
-
-def test_conda_does_not_have_package():
-    """Test that non-existent packages return False."""
-    assert conda_has_package("this_package_definitely_does_not_exist_xyz_123") == False
 
 
 def test_print_external_packages_output(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, capsys):
