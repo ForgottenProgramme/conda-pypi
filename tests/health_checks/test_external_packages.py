@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
@@ -23,8 +22,7 @@ from conda_pypi.health_checks.external_packages import (
     normalize_conda_file_paths,
     print_external_packages,
 )
-
-py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
+from tests import PYTHON_VERSION
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -39,7 +37,7 @@ def test_no_external_packages(tmp_env: TmpEnvFixture):
 
 def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture):
     """Test detection of external packages after installing with pip."""
-    with tmp_env(f"python={py_ver}", "pip") as prefix:
+    with tmp_env(f"python={PYTHON_VERSION}", "pip") as prefix:
         stdout, stderr, code = pip_cli(
             "install",
             "tests/pypi_local_index/demo-package/demo_package-0.1.0-py3-none-any.whl",
@@ -72,7 +70,7 @@ def test_conda_has_package(conda_local_channel, monkeypatch: MonkeyPatch, packag
 
 def test_print_external_packages_output(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, capsys):
     """Test the printed output format."""
-    with tmp_env(f"python={py_ver}", "pip") as prefix:
+    with tmp_env(f"python={PYTHON_VERSION}", "pip") as prefix:
         stdout, stderr, code = pip_cli(
             "install",
             "tests/pypi_local_index/demo-package/demo_package-0.1.0-py3-none-any.whl",
@@ -98,7 +96,7 @@ def test_build_migration_plan_safe_packages(
     tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, monkeypatch: MonkeyPatch, conda_local_channel
 ):
     """Test building a migration plan for packages available in conda."""
-    with tmp_env(f"python={py_ver}", "pip") as prefix:
+    with tmp_env(f"python={PYTHON_VERSION}", "pip") as prefix:
         monkeypatch.setenv("context.channels", conda_local_channel)
         reset_context()
         # Install a real package that exists in both pip and conda
@@ -141,7 +139,7 @@ def test_clean_up_stale_files_removes_unowned_metadata(
     tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture
 ):
     """Test removal of stale metadata directories."""
-    with tmp_env(f"python={py_ver}", "pip") as prefix:
+    with tmp_env(f"python={PYTHON_VERSION}", "pip") as prefix:
         pip_cli(
             "install",
             "tests/pypi_local_index/demo-package/demo_package-0.1.0-py3-none-any.whl",
