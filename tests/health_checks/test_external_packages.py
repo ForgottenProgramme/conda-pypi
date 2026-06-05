@@ -141,7 +141,7 @@ def test_clean_up_stale_files_removes_unowned_metadata(
 ):
     """Test removal of stale metadata directories."""
     with tmp_env(f"python={py_ver}", "pip") as prefix:
-        pip_cli("install", "requests", prefix=prefix)
+        pip_cli("install", "tests/pypi_local_index/demo-package/demo_package-0.1.0-py3-none-any.whl", prefix=prefix)
 
         packages = find_external_packages(prefix)
         conda_owned = get_conda_owned_paths(prefix)
