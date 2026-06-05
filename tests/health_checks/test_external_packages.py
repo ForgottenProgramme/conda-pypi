@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
@@ -37,13 +38,16 @@ def test_no_external_packages(tmp_env: TmpEnvFixture):
         assert find_external_packages(prefix) == []
 
 
-def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture):
+def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, conda_cli):
     """Test detection of external packages after installing with pip."""
     with tmp_env(f"python={py_ver}", "pip") as prefix:
         stdout, stderr, code = pip_cli("install", "requests", prefix=prefix)
         assert code == 0
         packages = find_external_packages(prefix)
-        assert packages != []
+        listout, listerr, listcode = conda_cli("list", "--prefix", prefix)
+        assert packages != [], (
+            f"stdout: {stdout}\n\nstderr: {stderr}\n\ncode: {code}\n\nlistout: {listout}\n\nlisterr: {listerr}\n\nlistcode: {listcode}\n\nPATH: {os.environ['PATH']}"
+        )
 
         names = []
         for pkg in packages:
@@ -72,9 +76,9 @@ def test_print_external_packages_output(tmp_env: TmpEnvFixture, pip_cli: PipCLIF
         stdout, stderr, code = pip_cli("install", "requests", prefix=prefix)
         assert code == 0
         print_external_packages(prefix, verbose=False)
-        captured = capsys.readouterr()
+        stdout, stderr = capsys.readouterr()
 
-        assert X_MARK in captured.out
+        assert X_MARK in stdout, f"stdout: {stdout}\n\nstderr: {stderr}"
 
 
 def test_print_external_packages_no_packages(tmp_env: TmpEnvFixture, capsys):
