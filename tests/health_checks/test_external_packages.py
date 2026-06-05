@@ -94,10 +94,11 @@ def test_print_external_packages_no_packages(tmp_env: TmpEnvFixture, capsys):
         assert OK_MARK in captured.out
 
 
-def test_build_migration_plan_safe_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, monkeypatch: MonkeyPatch, conda_local_channel):
+def test_build_migration_plan_safe_packages(
+    tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, monkeypatch: MonkeyPatch, conda_local_channel
+):
     """Test building a migration plan for packages available in conda."""
     with tmp_env(f"python={py_ver}", "pip") as prefix:
-
         monkeypatch.setenv("context.channels", conda_local_channel)
         reset_context()
         # Install a real package that exists in both pip and conda
@@ -141,7 +142,11 @@ def test_clean_up_stale_files_removes_unowned_metadata(
 ):
     """Test removal of stale metadata directories."""
     with tmp_env(f"python={py_ver}", "pip") as prefix:
-        pip_cli("install", "tests/pypi_local_index/demo-package/demo_package-0.1.0-py3-none-any.whl", prefix=prefix)
+        pip_cli(
+            "install",
+            "tests/pypi_local_index/demo-package/demo_package-0.1.0-py3-none-any.whl",
+            prefix=prefix,
+        )
 
         packages = find_external_packages(prefix)
         conda_owned = get_conda_owned_paths(prefix)
