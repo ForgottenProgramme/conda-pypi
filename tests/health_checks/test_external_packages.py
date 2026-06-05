@@ -4,12 +4,14 @@
 
 from __future__ import annotations
 
+from argparse import Namespace
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
 import pytest
 from conda.base.constants import OK_MARK, X_MARK
 from conda.base.context import reset_context
+from conda.core.prefix_data import PrefixData
 from pytest import MonkeyPatch
 
 from conda_pypi.health_checks.external_packages import (
@@ -19,6 +21,7 @@ from conda_pypi.health_checks.external_packages import (
     find_external_packages,
     find_python_metadata_directories,
     get_conda_owned_paths,
+    migrate_to_conda,
     normalize_conda_file_paths,
     print_external_packages,
 )
@@ -28,6 +31,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from conda.testing.fixtures import PipCLIFixture, TmpEnvFixture
+    from pytest_mock import MockerFixture
 
 
 def test_no_external_packages(tmp_env: TmpEnvFixture):
@@ -162,3 +166,30 @@ def test_clean_up_stale_files_removes_unowned_metadata(
         for metadata_dir in metadata_dirs_before:
             path = prefix_path / metadata_dir
             assert not path.exists(), f"Stale metadata directory {path} should have been removed"
+
+
+def test_migrate_to_conda(
+    mocker: MockerFixture,
+    monkeypatch: MonkeyPatch,
+    tmp_env: TmpEnvFixture,
+    pip_cli: PipCLIFixture,
+    with_rattler_solver: None,  # configures solver=rattler
+):
+    """Migrate pip-installed packages to conda from configured channels."""
+    with tmp_env(f"python={PYTHON_VERSION}", "pip") as prefix:
+        _, _, code = pip_cli("install", "tzdata", prefix=prefix)
+        assert code == 0
+        assert any(pkg.name == "tzdata" for pkg in find_external_packages(prefix))
+
+        mocker.patch(
+            "conda.base.context.Context.target_prefix",
+            new_callable=mocker.PropertyMock,
+            return_value=prefix,
+        )
+        monkeypatch.setenv("CONDA_ALWAYS_YES", "True")
+        reset_context()
+
+        args = Namespace(prefix=prefix, name=None, cmd="install", yes=True)
+        assert migrate_to_conda(prefix, args, confirm=lambda _msg: None) == 0
+        PrefixData._cache_.clear()
+        assert not any(pkg.name == "tzdata" for pkg in find_external_packages(prefix))

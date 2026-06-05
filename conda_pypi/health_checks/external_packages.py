@@ -49,7 +49,9 @@ def conda_has_package(name: str) -> bool:
     return bool(result)
 
 
-def build_migration_plan(packages) -> list:
+def build_migration_plan(
+    packages: list[PrefixRecord],
+) -> tuple[list[str], list[PrefixRecord]]:
     """Determine which packages can be safely migrated to conda."""
     safe_pkgs_conda_names = []
     safe_pkgs_pypi = []
