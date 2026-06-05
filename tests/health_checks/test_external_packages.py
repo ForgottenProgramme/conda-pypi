@@ -33,7 +33,7 @@ def test_no_external_packages(tmp_env: TmpEnvFixture):
 def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture):
     """Test detection of external packages after installing with pip."""
     with tmp_env(f"python={py_ver}", "pip") as prefix:
-        stdout, stderr, code = pip_cli("install", "requests", prefix=prefix)
+        stdout, stderr, code = pip_cli("install", "tests/pypi_local_index/demo-package/demo_package-0.1.0-py3-none-any.whl", prefix=prefix)
         assert code == 0
         packages = find_external_packages(prefix)
         assert packages != []
@@ -42,9 +42,9 @@ def test_external_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture):
         for pkg in packages:
             names.append(pkg.name)
 
-        assert "requests" in names
+        assert "demo-package" in names
 
-@pytest.mark.parametrize("package_name, expected", [("requests", True), ("this_package_definitely_does_not_exist_xyz_123", False),],)
+@pytest.mark.parametrize("package_name, expected", [("bzip2", True), ("this_package_definitely_does_not_exist_xyz_123", False),],)
 def test_conda_has_package(conda_local_channel, monkeypatch: MonkeyPatch, package_name, expected):
     """Test detection of packages available in conda channels."""
     monkeypatch.setenv("context.channels", conda_local_channel)
@@ -52,11 +52,10 @@ def test_conda_has_package(conda_local_channel, monkeypatch: MonkeyPatch, packag
     assert conda_has_package(package_name) == expected
 
 
-
 def test_print_external_packages_output(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, capsys):
     """Test the printed output format."""
     with tmp_env(f"python={py_ver}", "pip") as prefix:
-        stdout, stderr, code = pip_cli("install", "requests", prefix=prefix)
+        stdout, stderr, code = pip_cli("install", "tests/pypi_local_index/demo-package/demo_package-0.1.0-py3-none-any.whl", prefix=prefix)
         assert code == 0
         print_external_packages(prefix, verbose=False)
         captured = capsys.readouterr()
