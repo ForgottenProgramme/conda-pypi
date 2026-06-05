@@ -101,12 +101,12 @@ def test_build_migration_plan_safe_packages(tmp_env: TmpEnvFixture, pip_cli: Pip
         monkeypatch.setenv("context.channels", conda_local_channel)
         reset_context()
         # Install a real package that exists in both pip and conda
-        pip_cli("install", "requests", prefix=prefix)
+        pip_cli("install", "tzdata", prefix=prefix)
 
         packages = find_external_packages(prefix)
         conda_names, pypi_names = build_migration_plan(packages)
 
-        # requests should be found in conda
+        # tzdata should be found in conda
         assert len(conda_names) > 0
         assert len(pypi_names) == len(packages)
 
