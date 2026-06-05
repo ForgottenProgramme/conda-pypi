@@ -85,7 +85,6 @@ def find_python_metadata_directories(prefix_record: PrefixRecord) -> set[PurePos
                 break
     return directories
 
-
 def get_conda_owned_paths(prefix: str) -> set[PurePosixPath]:
     """Get the set of file paths owned by conda packages in the environment."""
 
@@ -97,9 +96,7 @@ def get_conda_owned_paths(prefix: str) -> set[PurePosixPath]:
     }
 
 
-def clean_up_stale_files(
-    prefix: str, prefix_record: PrefixRecord, conda_owned_paths: set[PurePosixPath]
-) -> None:
+def clean_up_stale_files(prefix: str, prefix_record: PrefixRecord, conda_owned_paths: set[PurePosixPath]) -> None:
     """Remove dist-info directories left behind by pip after migration."""
 
     print("Cleaning up stale metadata directories...")
@@ -158,7 +155,7 @@ def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> 
         return 1
 
     # remove paths not owned by conda that are left behind by pip after migration
-    conda_owned_paths = get_conda_owned_paths(prefix)
+    conda_owned_paths=get_conda_owned_paths(prefix)
     for pkg in safe_pkgs_pypi_names:
         clean_up_stale_files(prefix, pkg, conda_owned_paths)
 
