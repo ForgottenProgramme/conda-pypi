@@ -72,9 +72,12 @@ def test_print_external_packages_no_packages(tmp_env: TmpEnvFixture, capsys):
         assert OK_MARK in captured.out
 
 
-def test_build_migration_plan_safe_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture):
+def test_build_migration_plan_safe_packages(tmp_env: TmpEnvFixture, pip_cli: PipCLIFixture, monkeypatch: MonkeyPatch, conda_local_channel):
     """Test building a migration plan for packages available in conda."""
     with tmp_env(f"python={py_ver}", "pip") as prefix:
+
+        monkeypatch.setenv("context.channels", conda_local_channel)
+        reset_context()
         # Install a real package that exists in both pip and conda
         pip_cli("install", "requests", prefix=prefix)
         
