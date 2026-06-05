@@ -129,7 +129,7 @@ def test_normalize_conda_file_paths():
 
 def test_get_conda_owned_paths(tmp_env: TmpEnvFixture):
     """Test retrieval of conda-owned file paths."""
-    with tmp_env("numpy") as prefix:
+    with tmp_env("tzdata") as prefix:
         owned_paths = get_conda_owned_paths(prefix)
 
         assert len(owned_paths) > 0
