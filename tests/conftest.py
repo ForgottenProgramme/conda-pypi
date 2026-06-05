@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 
 import pytest
@@ -8,15 +7,13 @@ from conda.testing.fixtures import CondaCLIFixture
 from conda_index.index import ChannelIndex
 from conda_index.utils import CONDA_PACKAGE_EXTENSIONS
 
+from tests import CONDA_LOCAL_CHANNEL, PYPI_LOCAL_INDEX, PYTHON_VERSION
+
 pytest_plugins = (
     # Add testing fixtures and internal pytest plugins here
     "conda.testing",
     "conda.testing.fixtures",
 )
-HERE = Path(__file__).parent
-
-# Use the same Python version as the test environment
-PYTHON_VERSION = f"{sys.version_info.major}.{sys.version_info.minor}"
 
 
 @pytest.fixture(scope="session")
@@ -54,13 +51,13 @@ def do_not_notify_outdated_conda(monkeypatch):
 
 @pytest.fixture(scope="session")
 def pypi_demo_package_wheel_path() -> Path:
-    return HERE / "pypi_local_index" / "demo-package" / "demo_package-0.1.0-py3-none-any.whl"
+    return PYPI_LOCAL_INDEX / "demo-package" / "demo_package-0.1.0-py3-none-any.whl"
 
 
 @pytest.fixture(scope="session")
 def pypi_license_file_wheel_path() -> Path:
     """Wheel with PEP 639 License-File + LICENSE in .dist-info (see tests/pypi_local_index/license-file-pkg/)."""
-    return HERE / "pypi_local_index" / "license-file-pkg" / "lwt-0.0.1-py3-none-any.whl"
+    return PYPI_LOCAL_INDEX / "license-file-pkg" / "lwt-0.0.1-py3-none-any.whl"
 
 
 @pytest.fixture(scope="session")
@@ -68,7 +65,7 @@ def pypi_local_index():
     """
     Runs a local PyPI index by serving the folder "tests/pypi_local_index"
     """
-    base = HERE / "pypi_local_index"
+    base = PYPI_LOCAL_INDEX
     http = http_test_server.run_test_server(str(base))
 
     http_sock_name = http.socket.getsockname()
@@ -84,7 +81,7 @@ def conda_local_channel():
     This provides a mock conda channel with pre-converted packages for testing
     dependency resolution without requiring network access.
     """
-    base = HERE / "conda_local_channel"
+    base = CONDA_LOCAL_CHANNEL
     http = http_test_server.run_test_server(str(base))
 
     http_sock_name = http.socket.getsockname()
