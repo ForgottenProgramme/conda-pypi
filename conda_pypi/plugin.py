@@ -63,6 +63,6 @@ def conda_health_checks():
 def conda_settings():
     yield CondaSetting(
         name="conda_pypi_pip_warning",
-        description="Enable or disable the warning about using pip in conda environents",
+        description="Enable or disable the conda-pypi beta tip shown when pip is present",
         parameter=PrimitiveParameter(True),
     )
