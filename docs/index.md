@@ -13,12 +13,17 @@ It allows you to safely install PyPI packages in conda environments by
 converting them to conda format when possible, while falling back to
 traditional pip installation when needed.
 
-The tool offers two main commands: `conda pypi install` for safer PyPI
-package installation with an intelligent hybrid approach, and `conda pypi
-convert` for converting PyPI packages to `.conda` format without installing
-them. The smart installation strategy ensures that explicitly requested
-packages come from PyPI while dependencies are sourced from conda channels
-when available.
+The tool is available in conda versions 26.5 and newer. When configured
+with the `conda-pypi` channel (hosted by Anaconda) and the Rattler solver,
+the tool makes pure Python packages from PyPI available through
+the `conda install` command, with no extra conversion needed.
+
+The tool also offers two main commands for more advanced usage: `conda pypi install`
+for safer PyPI package installation with an intelligent hybrid approach,
+and `conda pypi convert` for converting PyPI packages to `.conda` format
+without installing them. The smart installation strategy ensures that
+explicitly requested packages come from PyPI while dependencies are sourced
+from conda channels when available.
 
 `conda-pypi` includes support for development workflows through editable
 installations with the `-e` flag for local project directories.
@@ -26,12 +31,6 @@ installations with the `-e` flag for local project directories.
 `conda-pypi` also installs `EXTERNALLY-MANAGED` marker files when you install
 the plugin, discouraging direct `pip` use that can destabilize conda-managed
 environments.
-
-:::{warning}
-This project is still in early stages of development. Don't use it in
-production (yet). We do welcome feedback on what the expected behaviour
-should have been if something doesn't work!
-:::
 
 ::::{grid} 2
 
