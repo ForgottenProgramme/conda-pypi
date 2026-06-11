@@ -10,7 +10,7 @@ from conda.plugins.types import (
     CondaSubcommand,
 )
 
-from conda_pypi import cli, post_command
+from conda_pypi import cli
 from conda_pypi.health_checks.external_packages import migrate_to_conda, print_external_packages
 from conda_pypi.main import notify_externally_managed_future
 from conda_pypi.package_extractors.whl import extract_whl_as_conda_pkg
@@ -32,11 +32,6 @@ def conda_post_commands():
         name="conda-pypi-notify-externally-managed-future",
         action=notify_externally_managed_future,
         run_for={"install", "create", "env_create"},
-    )
-    yield CondaPostCommand(
-        name="conda-pypi-post-install-create",
-        action=post_command.install.post_command,
-        run_for={"install", "create"},
     )
 
 
