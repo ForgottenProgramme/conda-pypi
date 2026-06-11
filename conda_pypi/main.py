@@ -9,7 +9,7 @@ from csv import reader as csv_reader
 from email.parser import HeaderParser
 from logging import getLogger
 from pathlib import Path
-from subprocess import CompletedProcess, run
+from subprocess import run
 from tempfile import NamedTemporaryFile
 from typing import Any, Iterable, Literal
 
@@ -28,7 +28,6 @@ from packaging.version import Version
 
 from conda_pypi.python_paths import (
     ensure_externally_managed,
-    get_env_python,
     get_env_site_packages,
     get_externally_managed_paths,
 )
@@ -83,59 +82,6 @@ def run_conda_install(
     command.extend(str(spec) for spec in specs)
 
     return run_conda_cli(*command)
-
-
-def run_pip_install(
-    prefix: Path,
-    args: Iterable[str],
-    upgrade: bool = False,
-    dry_run: bool = False,
-    quiet: bool = False,
-    verbosity: int = 0,
-    force_reinstall: bool = False,
-    yes: bool = False,
-    capture_output: bool = False,
-    check: bool = True,
-) -> CompletedProcess:
-    if not args:
-        return 0
-    command = [
-        get_env_python(prefix),
-        "-mpip",
-        "install",
-        "--no-deps",
-    ]
-    if any(
-        flag in args for flag in ("--platform", "--abi", "--implementation", "--python-version")
-    ):
-        command += ["--target", str(get_env_site_packages(prefix))]
-    else:
-        command += ["--prefix", str(prefix)]
-    if dry_run:
-        command.append("--dry-run")
-    if quiet:
-        command.append("--quiet")
-    if verbosity:
-        command.append("-" + ("v" * verbosity))
-    if force_reinstall:
-        command.append("--force-reinstall")
-    if upgrade:
-        command.append("--upgrade")
-    command.extend(args)
-
-    logger.info("pip install command: %s", command)
-    process = run(command, capture_output=capture_output or check, text=capture_output or check)
-    if check and process.returncode:
-        raise CondaError(
-            f"Failed to run pip:\n"
-            f"  command: {shlex.join(map(str, command))}\n"
-            f"  exit code: {process.returncode}\n"
-            f"  stderr:\n{process.stderr}\n"
-            f"  stdout:\n{process.stdout}"
-        )
-    logger.debug("pip install stdout:\n%s", process.stdout)
-    logger.debug("pip install stderr:\n%s", process.stderr)
-    return process
 
 
 def ensure_target_env_has_externally_managed(command: str):
