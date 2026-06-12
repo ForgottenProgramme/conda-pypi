@@ -2,6 +2,7 @@ from argparse import _SubParsersAction, Namespace
 from conda.auxlib.ish import dals
 from conda.exceptions import ArgumentError
 from pathlib import Path
+from conda_pypi.cli.convert import execute as execute_convert
 
 def configure_parser(parser: _SubParsersAction) -> None:
     """Configure all subcommand arguments and options via argparse"""
@@ -25,10 +26,44 @@ def configure_parser(parser: _SubParsersAction) -> None:
 def execute(args: Namespace) -> int:
     """Entry point for the `conda pypi index` subcommand"""
 
-    # validate provided directory
     directory=args.directory
+
+    # ensure directory is provided
+    if not directory:
+        raise SystemExit("No directory provided. Please specify a directory containing wheels to index.")
+    
+
+    # ensure provided path is a directory and follows expected structure
+    # Expected structure:
+    # root/
+    #   <package>/ <package>-*.whl
+
     if not directory.is_dir():
-        raise ArgumentError(f"Expected a directory: {directory}")
+        raise ArgumentError(f"Not a directory: {directory}")
+    
+    entries=list(directory.iterdir())
+    if not entries:
+        raise SystemExit(f"No wheel subdirectories found in the given directory: {directory}")
+    
+    # notify user of ignored invalid entries
+    invalid_entries=[entry for entry in entries if not entry.is_dir()]
+    if invalid_entries:
+        print(f"Found invalid entries (not wheel directories) in the given directory, ignoring them: {invalid_entries}")
+
+    # find valid entries
+    valid_entries= [entry for entry in  entries if entry.is_dir()]
+    if not valid_entries:
+        raise SystemExit(f"No valid wheel subdirectories found in the given directory: {directory}")
+    
+    for entry in valid_entries:
+        # one wheel file per subdirectory is expected
+        wheels=list(entry.glob("*.whl"))
+
+    
+
+
+
+
     
 
     
