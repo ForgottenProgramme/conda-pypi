@@ -6,7 +6,7 @@ from conda.exceptions import ArgumentError
 
 from conda_pypi.conda_build_utils import sha256_checksum
 from conda_pypi.license_files import package_metadata_from_metadata_body
-from conda_pypi.pypi_metadata import pypi_to_repodata
+from conda_pypi.index import store_pypi_metadata
 
 
 def configure_parser(parser: _SubParsersAction) -> None:
@@ -104,5 +104,5 @@ def execute(args: Namespace) -> int:
             ],
         }
 
-        # convert to repodata.json entry
-        entry = pypi_to_repodata(pypi_data)
+        # store the converted metadata in the conda index cache
+        store_pypi_metadata(pypi_data)

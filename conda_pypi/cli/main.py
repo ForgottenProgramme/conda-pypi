@@ -21,17 +21,17 @@ from conda_pypi.cli.convert import (
 from conda_pypi.cli.convert import (
     execute as execute_convert,
 )
+from conda_pypi.cli.index import (
+    configure_parser as configure_parser_index,
+)
+from conda_pypi.cli.index import (
+    execute as execute_index,
+)
 from conda_pypi.cli.install import (
     configure_parser as configure_parser_install,
 )
 from conda_pypi.cli.install import (
     execute as execute_install,
-)
-from conda_pypi.cli.index import(
-    configure_parser as configure_parser_index,
-)
-from conda_pypi.cli.index import (
-    execute as execute_index,
 )
 
 logger = getLogger(__name__)
@@ -80,7 +80,7 @@ def execute(args: argparse.Namespace) -> int:
         return execute_install(args)
     elif args.cmd == "convert":
         return execute_convert(args)
-    elif args.cmd=="index":
+    elif args.cmd == "index":
         return execute_index(args)
     else:
         raise ArgumentError(f"Unknown subcommand: {args.cmd}")
