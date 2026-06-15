@@ -5,8 +5,8 @@ from conda.auxlib.ish import dals
 from conda.exceptions import ArgumentError
 
 from conda_pypi.conda_build_utils import sha256_checksum
-from conda_pypi.license_files import package_metadata_from_metadata_body
 from conda_pypi.index import store_pypi_metadata, update_index
+from conda_pypi.license_files import package_metadata_from_metadata_body
 
 
 def configure_parser(parser: _SubParsersAction) -> None:
@@ -109,6 +109,6 @@ def execute(args: Namespace) -> int:
 
     # create a noarch subdir as expected by conda index
     noarch_dir = directory / "noarch"
-    noarch_dir.mkdir(parents=True, exist_ok=True)   
+    noarch_dir.mkdir(parents=True, exist_ok=True)
 
     update_index(directory)
