@@ -1,16 +1,21 @@
-from argparse import _SubParsersAction, Namespace
+from argparse import Namespace, _SubParsersAction
+from pathlib import Path
+
 from conda.auxlib.ish import dals
 from conda.exceptions import ArgumentError
-from pathlib import Path
-from conda_pypi.cli.convert import execute as execute_convert
+
+from conda_pypi.conda_build_utils import sha256_checksum
+from conda_pypi.license_files import package_metadata_from_metadata_body
+from conda_pypi.pypi_metadata import pypi_to_repodata
+
 
 def configure_parser(parser: _SubParsersAction) -> None:
     """Configure all subcommand arguments and options via argparse"""
 
-    summary= "Index a directory of `.whl` files to generate repodata.json"
-    description=summary
+    summary = "Index a directory of `.whl` files to generate repodata.json"
+    description = summary
     epilog = dals("""
-    Generate a `repodata.json` file from a directory of `.whl` files. 
+    Generate a `repodata.json` file from a directory of `.whl` files.
     This is useful for creating a local conda channel from a collection of wheel files.
     Examples:
     `conda pypi index <directory>`
@@ -21,17 +26,24 @@ def configure_parser(parser: _SubParsersAction) -> None:
         description=description,
         epilog=epilog,
     )
-    index.add_argument("directory", metavar="DIRECTORY", type=Path, help="Directory containing .whl files to index")
+    index.add_argument(
+        "directory",
+        metavar="DIRECTORY",
+        type=Path,
+        help="Directory containing .whl files to index",
+    )
+
 
 def execute(args: Namespace) -> int:
     """Entry point for the `conda pypi index` subcommand"""
 
-    directory=args.directory
+    directory = args.directory
 
     # ensure directory is provided
     if not directory:
-        raise SystemExit("No directory provided. Please specify a directory containing wheels to index.")
-    
+        raise SystemExit(
+            "No directory provided. Please specify a directory containing wheels to index."
+        )
 
     # ensure provided path is a directory and follows expected structure
     # Expected structure:
@@ -40,31 +52,57 @@ def execute(args: Namespace) -> int:
 
     if not directory.is_dir():
         raise ArgumentError(f"Not a directory: {directory}")
-    
-    entries=list(directory.iterdir())
+
+    entries = list(directory.iterdir())
     if not entries:
         raise SystemExit(f"No wheel subdirectories found in the given directory: {directory}")
-    
+
     # notify user of ignored invalid entries
-    invalid_entries=[entry for entry in entries if not entry.is_dir()]
+    invalid_entries = [entry for entry in entries if not entry.is_dir()]
     if invalid_entries:
-        print(f"Found invalid entries (not wheel directories) in the given directory, ignoring them: {invalid_entries}")
+        print(
+            f"Found invalid entries (not wheel directories) in the given directory, ignoring them: {invalid_entries}"
+        )
 
     # find valid entries
-    valid_entries= [entry for entry in  entries if entry.is_dir()]
+    valid_entries = [entry for entry in entries if entry.is_dir()]
     if not valid_entries:
-        raise SystemExit(f"No valid wheel subdirectories found in the given directory: {directory}")
-    
+        raise SystemExit(
+            f"No valid wheel subdirectories found in the given directory: {directory}"
+        )
+
+    all_wheels = []
     for entry in valid_entries:
         # one wheel file per subdirectory is expected
-        wheels=list(entry.glob("*.whl"))
+        all_wheels.extend(entry.glob("*.whl"))
 
-    
+    if not all_wheels:
+        raise SystemExit(f"No wheel files found in the given directory: {directory}")
 
+    for wheel in all_wheels:
+        wheel_metadata = package_metadata_from_metadata_body(wheel.read_dist_info("METADATA"))
 
+        # convert the output to json format using the `json` property of the PackageMetadata class
+        wheel_metadata_json = wheel_metadata.json
 
+        # generate the expected dict structure of pypi metadata with the relevant fields as needed by the `pypi_to_repodata` function.
+        pypi_data = {
+            "info": {
+                "name": wheel_metadata_json.get("name"),
+                "version": wheel_metadata_json.get("version"),
+                "requires_dist": wheel_metadata_json.get("requires_dist", []),
+                "requires_python": wheel_metadata_json.get("requires_python"),
+            },
+            "urls": [
+                {
+                    "packagetype": "bdist_wheel",
+                    "filename": wheel.name,
+                    "url": str(wheel),
+                    "size": wheel.stat().st_size,
+                    "digests": {"sha256": sha256_checksum(str(wheel))},
+                }
+            ],
+        }
 
-    
-
-    
-    
+        # convert to repodata.json entry
+        entry = pypi_to_repodata(pypi_data)
