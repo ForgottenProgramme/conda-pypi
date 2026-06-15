@@ -6,7 +6,7 @@ from conda.exceptions import ArgumentError
 
 from conda_pypi.conda_build_utils import sha256_checksum
 from conda_pypi.license_files import package_metadata_from_metadata_body
-from conda_pypi.index import store_pypi_metadata
+from conda_pypi.index import store_pypi_metadata, update_index
 
 
 def configure_parser(parser: _SubParsersAction) -> None:
@@ -106,3 +106,9 @@ def execute(args: Namespace) -> int:
 
         # store the converted metadata in the conda index cache
         store_pypi_metadata(pypi_data)
+
+    # create a noarch subdir as expected by conda index
+    noarch_dir = directory / "noarch"
+    noarch_dir.mkdir(parents=True, exist_ok=True)   
+
+    update_index(directory)
