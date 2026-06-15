@@ -2,6 +2,24 @@
 
 [//]: # (current developments)
 
+## 0.10.1 (2026-06-12)
+
+### Docs
+
+* Update the docs landing page to focus on `conda install` workflows. (#398 via #405)
+
+### Other
+
+* Remove `conda-pypi-post-install-create` post install plugin. (#408)
+
+### Contributors
+
+* @kathatherine
+* @soapy1
+* @pre-commit-ci[bot]
+
+
+
 ## 0.10.0 (2026-06-09)
 
 ### Enhancements
