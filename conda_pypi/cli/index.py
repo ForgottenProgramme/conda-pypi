@@ -5,8 +5,11 @@ from conda.auxlib.ish import dals
 from conda.exceptions import ArgumentError
 
 from conda_pypi.conda_build_utils import sha256_checksum
-from conda_pypi.index import store_pypi_metadata, update_index
+from conda_pypi.index import store_pypi_metadata, update_index, create_channel_index
 from conda_pypi.license_files import package_metadata_from_metadata_body
+
+from installer.sources import WheelFile
+from importlib.metadata import PackageMetadata
 
 
 def configure_parser(parser: _SubParsersAction) -> None:
@@ -34,22 +37,12 @@ def configure_parser(parser: _SubParsersAction) -> None:
     )
 
 
-def execute(args: Namespace) -> int:
-    """Entry point for the `conda pypi index` subcommand"""
-
-    directory = args.directory
-
-    # ensure directory is provided
-    if not directory:
-        raise SystemExit(
-            "No directory provided. Please specify a directory containing wheels to index."
-        )
-
-    # ensure provided path is a directory and follows expected structure
-    # Expected structure:
-    # root/
-    #   <package>/ <package>-*.whl
-
+def validate_dir_and_return_whl_files(directory: Path) -> list[Path]:
+    """Ensure provided path is a directory and follows expected structure
+    Expected structure:
+    root/
+      <package>/ <package>-*.whl"""
+    
     if not directory.is_dir():
         raise ArgumentError(f"Not a directory: {directory}")
 
@@ -78,15 +71,17 @@ def execute(args: Namespace) -> int:
 
     if not all_wheels:
         raise SystemExit(f"No wheel files found in the given directory: {directory}")
+    
+    return all_wheels
 
-    for wheel in all_wheels:
-        wheel_metadata = package_metadata_from_metadata_body(wheel.read_dist_info("METADATA"))
 
-        # convert the output to json format using the `json` property of the PackageMetadata class
-        wheel_metadata_json = wheel_metadata.json
+def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata):
+    """Return expected dict structure of pypi metadata with the relevant fields"""
 
-        # generate the expected dict structure of pypi metadata with the relevant fields as needed by the `pypi_to_repodata` function.
-        pypi_data = {
+    # convert to json format using the `json` property of the PackageMetadata class
+    wheel_metadata_json= wheel_metadata.json
+    # generate the expected dict structure of pypi metadata with the relevant fields as needed by the `pypi_to_repodata` function.
+    pypi_data = {
             "info": {
                 "name": wheel_metadata_json.get("name"),
                 "version": wheel_metadata_json.get("version"),
@@ -103,12 +98,48 @@ def execute(args: Namespace) -> int:
                 }
             ],
         }
+    return pypi_data
 
+
+def execute(args: Namespace) -> int:
+    """Entry point for the `conda pypi index` subcommand"""
+
+    directory = args.directory
+    # ensure directory is provided
+    if not directory:
+        raise SystemExit(
+            "No directory provided. Please specify a directory containing wheels to index."
+        )
+    
+    all_wheels = validate_dir_and_return_whl_files(directory)
+    failed_wheels = []
+
+    # creat channel_index and cache
+    channel_index=create_channel_index(directory)
+    cache = channel_index.cache_for_subdir("noarch")
+
+    for wheel in all_wheels:
+        try:
+            with WheelFile.open(wheel) as source:
+                wheel_metadata = package_metadata_from_metadata_body(source.read_dist_info("METADATA"))
+        except Exception as e:
+            print(f"Failed to process {wheel}: {e}")
+            failed_wheels.append(wheel)
+            continue
+
+        pypi_data=pypi_data_dict(wheel, wheel_metadata)
+    
         # store the converted metadata in the conda index cache
-        store_pypi_metadata(pypi_data)
+        store_pypi_metadata(cache, pypi_data)
 
-    # create a noarch subdir as expected by conda index
-    noarch_dir = directory / "noarch"
-    noarch_dir.mkdir(parents=True, exist_ok=True)
+    update_index(channel_index)
 
-    update_index(directory)
+    # inform user about wheels that couldn't be indexed
+    if failed_wheels:
+        failed_names = ", ".join(wheel.name for wheel in failed_wheels)
+        print(
+            f"Indexed {len(all_wheels) - len(failed_wheels)} wheels; "
+            f"{len(failed_wheels)} failed: {failed_names}"
+        )
+
+    return 0

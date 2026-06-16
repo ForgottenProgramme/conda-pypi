@@ -11,7 +11,7 @@ from conda_pypi.exceptions import UnableToConvertToRepodataEntry
 from conda_pypi.pypi_metadata import pypi_to_repodata
 
 
-def update_index(path):
+def create_channel_index(path):
     channel_index = ChannelIndex(
         path,
         None,
@@ -23,6 +23,9 @@ def update_index(path):
         compact_json=True,
         write_current_repodata=False,
     )
+    return channel_index
+
+def update_index(channel_index: ChannelIndex):
     channel_index.index(patch_generator=None)
     channel_index.update_channeldata()
 
