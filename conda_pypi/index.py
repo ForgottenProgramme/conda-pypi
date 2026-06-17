@@ -6,10 +6,10 @@ from typing import Any
 
 from conda_index.index import ChannelIndex
 from conda_index.index.cache import BaseCondaIndexCache
+from conda_index.utils import CONDA_PACKAGE_EXTENSIONS
 
 from conda_pypi.exceptions import UnableToConvertToRepodataEntry
 from conda_pypi.pypi_metadata import pypi_to_repodata
-from conda_index.utils import CONDA_PACKAGE_EXTENSIONS
 
 
 def create_channel_index(path):
