@@ -22,6 +22,7 @@ def create_channel_index(path):
         write_run_exports=True,
         compact_json=True,
         write_current_repodata=False,
+        repodata_v3=True,
     )
     return channel_index
 
