@@ -17,8 +17,7 @@ def configure_parser(parser: _SubParsersAction) -> None:
     summary = "Index a directory of `.whl` files to generate repodata.json"
     description = summary
     epilog = dals("""
-    Generate a `repodata.json` file from a directory of `.whl` files.
-    This is useful for creating a local conda channel from a collection of wheel files.
+    Creates a local conda channel from a collection of wheel files.
     Examples:
     `conda pypi index <directory>`
     """)
