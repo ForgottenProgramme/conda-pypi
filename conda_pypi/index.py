@@ -9,6 +9,7 @@ from conda_index.index.cache import BaseCondaIndexCache
 
 from conda_pypi.exceptions import UnableToConvertToRepodataEntry
 from conda_pypi.pypi_metadata import pypi_to_repodata
+from conda_index.utils import CONDA_PACKAGE_EXTENSIONS
 
 
 def create_channel_index(path):
@@ -22,6 +23,10 @@ def create_channel_index(path):
         write_run_exports=True,
         compact_json=True,
         write_current_repodata=False,
+        repodata_v3=True,
+        cache_kwargs={"package_extensions": CONDA_PACKAGE_EXTENSIONS + (".whl",)},
+        update_only=True,
+        save_fs_state=False,
     )
     return channel_index
 
