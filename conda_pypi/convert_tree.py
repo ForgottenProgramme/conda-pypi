@@ -27,7 +27,7 @@ from unearth import PackageFinder
 
 from conda_pypi.build import build_conda
 from conda_pypi.downloader import find_and_fetch, get_package_finder
-from conda_pypi.index import update_index, create_channel_index
+from conda_pypi.index import create_channel_index, update_index
 from conda_pypi.utils import SuppressOutput
 
 log = logging.getLogger(__name__)

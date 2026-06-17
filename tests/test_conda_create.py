@@ -9,7 +9,7 @@ from conda_package_streaming.create import conda_builder
 
 from conda_pypi.build import filter, paths_json
 from conda_pypi.conda_build_utils import PathType, sha256_checksum
-from conda_pypi.index import update_index, create_channel_index
+from conda_pypi.index import create_channel_index, update_index
 from conda_pypi.translate import PackageRecord
 
 here = Path(__file__).parent
