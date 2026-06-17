@@ -41,7 +41,7 @@ def test_indexable(tmp_path):
 
     update_index(create_channel_index(tmp_path))
 
-    repodata = json.loads((noarch / "repodata.json").read_text())
+    repodata = json.loads((noarch / "repodata2.json").read_text())
     assert repodata["packages.conda"]
 
     # name, version, build = dist_str.rsplit("-", 2) must be named like this
