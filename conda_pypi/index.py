@@ -25,6 +25,7 @@ def create_channel_index(path):
     )
     return channel_index
 
+
 def update_index(channel_index: ChannelIndex):
     channel_index.index(patch_generator=None)
     channel_index.update_channeldata()
