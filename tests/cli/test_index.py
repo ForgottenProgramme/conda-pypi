@@ -14,6 +14,15 @@ from conda_pypi.cli.index import execute, validate_dir_and_return_whl_files
 here = Path(__file__).parent.parent
 
 
+def test_cli(conda_cli):
+    """
+    Test that index subcommands exist.
+    """
+    out, err, rc = conda_cli("pypi", "index", "--help", raises=SystemExit)
+    assert rc.value.code == 0 
+    assert "DIRECTORY" in out
+
+
 def test_validate_dir_not_a_directory(tmp_path):
     """Test invalid dir"""
     not_a_dir = tmp_path / "file.txt"
