@@ -2,11 +2,14 @@
 Tests for the `conda pypi index` subcommand.
 """
 
+import json
+import shutil
+from argparse import Namespace
 from pathlib import Path
 
 import pytest
 
-from conda_pypi.cli.index import validate_dir_and_return_whl_files
+from conda_pypi.cli.index import execute, validate_dir_and_return_whl_files
 
 here = Path(__file__).parent.parent
 
@@ -32,3 +35,27 @@ def test_validate_dir_returns_wheels():
     result = validate_dir_and_return_whl_files(here / "pypi_local_index")
     assert len(result) > 1
     assert any(wheel.name == "demo_package-0.1.0-py3-none-any.whl" for wheel in result)
+
+
+def test_execute_no_directory():
+    args = Namespace(directory=None)
+    with pytest.raises(SystemExit):
+        execute(args)
+
+
+def test_execute_indexes_wheels(tmp_path):
+    """
+    execute() reads .whl files from a directory structure and produces
+    a repodata.json with entries under v3.whl.
+    """
+    shutil.copytree(here / "pypi_local_index", tmp_path / "pypi_local_index")
+
+    args = Namespace(directory=tmp_path / "pypi_local_index")
+    result = execute(args)
+
+    assert result == 0
+
+    repodata = json.loads((tmp_path / "pypi_local_index" / "noarch" / "repodata.json").read_text())
+    assert "v3" in repodata
+    assert "whl" in repodata["v3"]
+    assert len(repodata["v3"]["whl"]) == 6
