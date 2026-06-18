@@ -9,8 +9,9 @@ from conda_package_streaming.create import conda_builder
 
 from conda_pypi.build import filter, paths_json
 from conda_pypi.conda_build_utils import PathType, sha256_checksum
-from conda_pypi.index import ChannelIndex, update_index
+from conda_pypi.index import update_index
 from conda_pypi.translate import PackageRecord
+from conda_index.index import ChannelIndex
 
 here = Path(__file__).parent
 
@@ -39,7 +40,7 @@ def test_indexable(tmp_path):
     with conda_builder(record.stem, noarch) as tar:
         tar.add(dest, "", filter=filter)
 
-    channel_index = channel_index = ChannelIndex(
+    channel_index = ChannelIndex(
         tmp_path,
         None,
         threads=1,
