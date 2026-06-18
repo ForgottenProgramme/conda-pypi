@@ -27,8 +27,10 @@ from unearth import PackageFinder
 
 from conda_pypi.build import build_conda
 from conda_pypi.downloader import find_and_fetch, get_package_finder
-from conda_pypi.index import create_channel_index, update_index
+from conda_pypi.index import update_index
 from conda_pypi.utils import SuppressOutput
+from conda_index.index import ChannelIndex
+
 
 log = logging.getLogger(__name__)
 
@@ -139,7 +141,7 @@ class ConvertTree:
 
                 converted.add(normal_wheel)
 
-            update_index(create_channel_index(repo))
+            update_index(ChannelIndex(repo,None,write_run_exports=True,compact_json=True,write_current_repodata=False,))
         else:
             log.debug(f"Exceeded maximum of {max_attempts} attempts")
             return None
@@ -185,7 +187,7 @@ class ConvertTree:
         """
         (self.repo / "noarch").mkdir(parents=True, exist_ok=True)
         if not (self.repo / "noarch" / "repodata.json").exists():
-            update_index(create_channel_index(self.repo))
+            update_index(ChannelIndex(self.repo,None,write_run_exports=True,compact_json=True,write_current_repodata=False,))
 
         with tempfile.TemporaryDirectory() as tmp_path:
             tmp_path = pathlib.Path(tmp_path)

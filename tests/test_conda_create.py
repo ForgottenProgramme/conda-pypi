@@ -11,6 +11,7 @@ from conda_pypi.build import filter, paths_json
 from conda_pypi.conda_build_utils import PathType, sha256_checksum
 from conda_pypi.index import create_channel_index, update_index
 from conda_pypi.translate import PackageRecord
+from conda_pypi.index import ChannelIndex
 
 here = Path(__file__).parent
 
@@ -38,8 +39,19 @@ def test_indexable(tmp_path):
 
     with conda_builder(record.stem, noarch) as tar:
         tar.add(dest, "", filter=filter)
-
-    update_index(create_channel_index(tmp_path))
+    
+    channel_index= channel_index = ChannelIndex(
+        tmp_path,
+        None,
+        threads=1,
+        debug=False,
+        write_bz2=False,
+        write_zst=True,
+        write_run_exports=True,
+        compact_json=True,
+        write_current_repodata=False,
+    )
+    update_index(channel_index)
 
     repodata = json.loads((noarch / "repodata.json").read_text())
     assert repodata["packages.conda"]
