@@ -1,3 +1,4 @@
+import zipfile
 from argparse import Namespace, _SubParsersAction
 from importlib.metadata import PackageMetadata
 from pathlib import Path
@@ -5,8 +6,10 @@ from pathlib import Path
 from conda.auxlib.ish import dals
 from conda.exceptions import ArgumentError
 from installer.sources import WheelFile
+from packaging.requirements import InvalidRequirement
 
 from conda_pypi.conda_build_utils import sha256_checksum
+from conda_pypi.exceptions import UnableToConvertToRepodataEntry
 from conda_pypi.index import create_channel_index, store_pypi_metadata, update_index
 from conda_pypi.license_files import package_metadata_from_metadata_body
 
