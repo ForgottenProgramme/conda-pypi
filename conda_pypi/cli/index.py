@@ -122,15 +122,20 @@ def execute(args: Namespace) -> int:
                 wheel_metadata = package_metadata_from_metadata_body(
                     source.read_dist_info("METADATA")
                 )
-        except Exception as e:
-            print(f"Failed to process {wheel}: {e}")
+            pypi_data = pypi_data_dict(wheel, wheel_metadata)
+            store_pypi_metadata(cache, pypi_data)
+        except UnableToConvertToRepodataEntry as e:
+            print(f"Skipping {wheel.name}: {e}")
             failed_wheels.append(wheel)
-            continue
-
-        pypi_data = pypi_data_dict(wheel, wheel_metadata)
-
-        # store the converted metadata in the conda index cache
-        store_pypi_metadata(cache, pypi_data)
+        except InvalidRequirement as e:
+            print(f"Skipping {wheel.name}: invalid metadata ({e})")
+            failed_wheels.append(wheel)
+        except ValueError as e:
+            print(f"Skipping {wheel.name}: {e}")
+            failed_wheels.append(wheel)
+        except (OSError, zipfile.BadZipFile) as e:
+            print(f"Failed to read {wheel.name}: {e}")
+            failed_wheels.append(wheel)
 
     update_index(channel_index)
 
