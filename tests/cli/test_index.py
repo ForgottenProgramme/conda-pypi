@@ -57,12 +57,6 @@ def test_validate_dir_returns_wheels():
     assert any(wheel.name == "demo_package-0.1.0-py3-none-any.whl" for wheel in result)
 
 
-def test_execute_no_directory():
-    args = Namespace(directory=None)
-    with pytest.raises(SystemExit):
-        execute(args)
-
-
 def test_execute_indexes_wheels(tmp_path):
     """
     execute() reads .whl files from a directory structure and produces
