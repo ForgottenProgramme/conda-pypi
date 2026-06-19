@@ -4,6 +4,7 @@ Tests for the `conda pypi index` subcommand.
 
 import json
 import shutil
+import zipfile
 from argparse import Namespace
 from pathlib import Path
 
@@ -81,7 +82,7 @@ def test_execute_indexes_wheels(tmp_path):
 
 
 def test_execute_reports_failed_wheels(tmp_path, capsys):
-    """Test failed wheels reported"""
+    """Test OS/BadZipFile Error"""
     pkg_dir = tmp_path / "bad-package"
     pkg_dir.mkdir()
     (pkg_dir / "bad_package-1.0.0-py3-none-any.whl").write_bytes(b"not a real wheel")
@@ -91,4 +92,52 @@ def test_execute_reports_failed_wheels(tmp_path, capsys):
 
     assert result == 0
     captured = capsys.readouterr()
-    assert "failed" in captured.out
+    assert "Failed to read" in captured.out
+
+
+def make_wheel(
+    path: Path, name: str, version: str, requires_dist: list[str] = (), platform: str = "none-any"
+) -> Path:
+    """Create a minimal valid .whl file with given metadata."""
+    wheel_name = f"{name}-{version}-py3-{platform}.whl"
+    wheel_path = path / wheel_name
+    metadata = "\n".join(
+        [
+            "Metadata-Version: 2.1",
+            f"Name: {name}",
+            f"Version: {version}",
+            *[f"Requires-Dist: {req}" for req in requires_dist],
+        ]
+    )
+    with zipfile.ZipFile(wheel_path, "w") as zf:
+        zf.writestr(f"{name}-{version}.dist-info/METADATA", metadata)
+        zf.writestr(f"{name}-{version}.dist-info/WHEEL", "Wheel-Version: 1.0\n")
+    return wheel_path
+
+
+def test_execute_skips_wheel_with_invalid_requirement(tmp_path, capsys):
+    """A wheel with a malformed Requires-Dist is skipped without crashing indexing."""
+    pkg_dir = tmp_path / "bad-package"
+    pkg_dir.mkdir()
+    make_wheel(pkg_dir, "bad_package", "1.0.0", requires_dist=["!!!invalid!!!"])
+
+    args = Namespace(directory=tmp_path)
+    result = execute(args)
+
+    assert result == 0
+    captured = capsys.readouterr()
+    assert "invalid metadata" in captured.out
+
+
+def test_execute_skips_platform_specific_wheel(tmp_path, capsys):
+    """A platform-specific wheel cannot be converted to a repodata entry and is skipped."""
+    pkg_dir = tmp_path / "bad-package"
+    pkg_dir.mkdir()
+    make_wheel(pkg_dir, "bad_package", "1.0.0", platform="cp311-win_amd64")
+
+    args = Namespace(directory=tmp_path)
+    result = execute(args)
+
+    assert result == 0
+    captured = capsys.readouterr()
+    assert "not a pure-python whee" in captured.out

@@ -128,7 +128,7 @@ def execute(args: Namespace) -> int:
             pypi_data = pypi_data_dict(wheel, wheel_metadata)
             store_pypi_metadata(cache, pypi_data)
         except UnableToConvertToRepodataEntry as e:
-            print(f"Skipping {wheel.name}: {e}")
+            print(f"Skipping {wheel.name}: not a pure-python wheel ({e})")
             failed_wheels.append(wheel)
         except InvalidRequirement as e:
             print(f"Skipping {wheel.name}: invalid metadata ({e})")
