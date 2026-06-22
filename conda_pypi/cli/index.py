@@ -36,6 +36,10 @@ def configure_parser(parser: _SubParsersAction) -> None:
         type=Path,
         help="Directory containing .whl files to index",
     )
+    index.add_argument(
+        "--base-url",
+        help="Base URL for the channel (e.g. https://packages.example.com/). Defaults to a file:// URI of the given directory.",
+    )
 
 
 def validate_dir_and_return_whl_files(directory: Path) -> list[Path]:
@@ -76,7 +80,7 @@ def validate_dir_and_return_whl_files(directory: Path) -> list[Path]:
     return all_wheels
 
 
-def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata):
+def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata, base_url: str):
     """Return expected dict structure of pypi metadata with the relevant fields"""
 
     # convert to json format using the `json` property of the PackageMetadata class
@@ -93,7 +97,7 @@ def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata):
             {
                 "packagetype": "bdist_wheel",
                 "filename": wheel.name,
-                "url": str(wheel),
+                "url": base_url + wheel.name,
                 "size": wheel.stat().st_size,
                 "digests": {"sha256": sha256_checksum(str(wheel))},
             }
@@ -106,6 +110,12 @@ def execute(args: Namespace) -> int:
     """Entry point for the `conda pypi index` subcommand"""
 
     directory = Path(args.directory).expanduser()
+
+    # build the base_url
+    base_url = args.base_url or Path(directory).resolve().as_uri()
+
+    # normalize it to have only one forwardslash at the end
+    base_url = base_url.rstrip("/") + "/"
 
     all_wheels = validate_dir_and_return_whl_files(directory)
     failed_wheels = []
@@ -120,7 +130,7 @@ def execute(args: Namespace) -> int:
                 wheel_metadata = package_metadata_from_metadata_body(
                     source.read_dist_info("METADATA")
                 )
-            pypi_data = pypi_data_dict(wheel, wheel_metadata)
+            pypi_data = pypi_data_dict(wheel, wheel_metadata, base_url)
             store_pypi_metadata(cache, pypi_data)
         except UnableToConvertToRepodataEntry as e:
             print(f"Skipping {wheel.name}: not a pure-python wheel ({e})")

@@ -64,7 +64,7 @@ def test_execute_indexes_wheels(tmp_path):
     """
     shutil.copytree(here / "pypi_local_index", tmp_path / "pypi_local_index")
 
-    args = Namespace(directory=tmp_path / "pypi_local_index")
+    args = Namespace(directory=tmp_path / "pypi_local_index", base_url=None)
     result = execute(args)
 
     assert result == 0
@@ -81,7 +81,7 @@ def test_execute_reports_failed_wheels(tmp_path, capsys):
     pkg_dir.mkdir()
     (pkg_dir / "bad_package-1.0.0-py3-none-any.whl").write_bytes(b"not a real wheel")
 
-    args = Namespace(directory=tmp_path)
+    args = Namespace(directory=tmp_path, base_url=None)
     result = execute(args)
 
     assert result == 0
@@ -115,7 +115,7 @@ def test_execute_skips_wheel_with_invalid_requirement(tmp_path, capsys):
     pkg_dir.mkdir()
     make_wheel(pkg_dir, "bad_package", "1.0.0", requires_dist=["!!!invalid!!!"])
 
-    args = Namespace(directory=tmp_path)
+    args = Namespace(directory=tmp_path, base_url=None)
     result = execute(args)
 
     assert result == 0
@@ -129,7 +129,7 @@ def test_execute_skips_platform_specific_wheel(tmp_path, capsys):
     pkg_dir.mkdir()
     make_wheel(pkg_dir, "bad_package", "1.0.0", platform="cp311-win_amd64")
 
-    args = Namespace(directory=tmp_path)
+    args = Namespace(directory=tmp_path, base_url=None)
     result = execute(args)
 
     assert result == 0
