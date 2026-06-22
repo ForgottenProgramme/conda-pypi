@@ -80,7 +80,7 @@ def validate_dir_and_return_whl_files(directory: Path) -> list[Path]:
     return all_wheels
 
 
-def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata, base_url: str):
+def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata, url: str):
     """Return expected dict structure of pypi metadata with the relevant fields"""
 
     # convert to json format using the `json` property of the PackageMetadata class
@@ -97,7 +97,7 @@ def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata, base_url: str):
             {
                 "packagetype": "bdist_wheel",
                 "filename": wheel.name,
-                "url": base_url + wheel.name,
+                "url": url,
                 "size": wheel.stat().st_size,
                 "digests": {"sha256": sha256_checksum(str(wheel))},
             }
@@ -111,11 +111,8 @@ def execute(args: Namespace) -> int:
 
     directory = Path(args.directory).expanduser()
 
-    # build the base_url
-    base_url = args.base_url or Path(directory).resolve().as_uri()
-
-    # normalize it to have only one forwardslash at the end
-    base_url = base_url.rstrip("/") + "/"
+    if args.base_url:
+        base_url = args.base_url.rstrip("/") + "/"
 
     all_wheels = validate_dir_and_return_whl_files(directory)
     failed_wheels = []
@@ -130,7 +127,11 @@ def execute(args: Namespace) -> int:
                 wheel_metadata = package_metadata_from_metadata_body(
                     source.read_dist_info("METADATA")
                 )
-            pypi_data = pypi_data_dict(wheel, wheel_metadata, base_url)
+            if args.base_url:
+                url = base_url + wheel.relative_to(directory).as_posix()
+            else:
+                url = wheel.resolve().as_uri()
+            pypi_data = pypi_data_dict(wheel, wheel_metadata, url)
             store_pypi_metadata(cache, pypi_data)
         except UnableToConvertToRepodataEntry as e:
             print(f"Skipping {wheel.name}: not a pure-python wheel ({e})")
