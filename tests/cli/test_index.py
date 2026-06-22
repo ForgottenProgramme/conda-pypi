@@ -9,6 +9,7 @@ from argparse import Namespace
 from pathlib import Path
 
 import pytest
+from conda.exceptions import ArgumentError
 
 from conda_pypi.cli.index import execute, validate_dir_and_return_whl_files
 
@@ -27,7 +28,7 @@ def test_cli(conda_cli):
 def test_validate_dir_not_a_directory(tmp_path):
     """Test invalid dir"""
     not_a_dir = tmp_path / "file.txt"
-    with pytest.raises(Exception):
+    with pytest.raises(ArgumentError, match="Not a directory"):
         validate_dir_and_return_whl_files(not_a_dir)
 
 
