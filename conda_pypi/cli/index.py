@@ -105,7 +105,7 @@ def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata):
 def execute(args: Namespace) -> int:
     """Entry point for the `conda pypi index` subcommand"""
 
-    directory = args.directory
+    directory = Path(args.directory).expanduser()
 
     all_wheels = validate_dir_and_return_whl_files(directory)
     failed_wheels = []
