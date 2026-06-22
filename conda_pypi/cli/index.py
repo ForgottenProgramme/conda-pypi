@@ -38,7 +38,7 @@ def configure_parser(parser: _SubParsersAction) -> None:
     )
     index.add_argument(
         "--base-url",
-        help="Base URL for the channel (e.g. https://packages.example.com/). Defaults to a file:// URI of the given directory.",
+        help="Base URL for the channel (e.g. https://packages.example.com/). When omitted, each entry uses a file:// URI for each wheel file.",
     )
 
 
