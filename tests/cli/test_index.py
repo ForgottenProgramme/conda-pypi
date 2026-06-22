@@ -148,3 +148,16 @@ def test_base_url_is_passed(tmp_path):
     repodata = json.loads((tmp_path / "pypi_local_index" / "noarch" / "repodata.json").read_text())
     for entry in repodata["v3"]["whl"].values():
         assert entry["url"].startswith("https://example.com/")
+
+
+def test_execute_expands_user_in_directory(tmp_path, monkeypatch):
+    """Test that ~ in directory path is expanded to the user's home directory."""
+    shutil.copytree(here / "pypi_local_index", tmp_path / "pypi_local_index")
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))  # for windows
+
+    args = Namespace(directory=Path("~/pypi_local_index"), base_url=None)
+    result = execute(args)
+
+    assert result == 0
+    assert (tmp_path / "pypi_local_index" / "noarch" / "repodata.json").exists()
