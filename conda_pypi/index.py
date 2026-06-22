@@ -18,7 +18,6 @@ def create_channel_index(path):
         None,
         threads=1,
         write_zst=True,
-        write_run_exports=True,
         write_current_repodata=False,
         repodata_v3=True,
         cache_kwargs={"package_extensions": CONDA_PACKAGE_EXTENSIONS + (".whl",)},
