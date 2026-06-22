@@ -59,7 +59,7 @@ def test_validate_dir_returns_wheels():
 
 def test_execute_indexes_wheels(tmp_path):
     """
-    execute() reads .whl files from a directory structure and produces
+    Test that execute() reads .whl files from a directory structure and produces
     a repodata.json with entries under v3.whl.
     """
     shutil.copytree(here / "pypi_local_index", tmp_path / "pypi_local_index")
@@ -110,7 +110,7 @@ def make_wheel(
 
 
 def test_execute_skips_wheel_with_invalid_requirement(tmp_path, capsys):
-    """A wheel with a malformed Requires-Dist is skipped without crashing indexing."""
+    """Test that a wheel with a malformed Requires-Dist is skipped without crashing indexing."""
     pkg_dir = tmp_path / "bad-package"
     pkg_dir.mkdir()
     make_wheel(pkg_dir, "bad_package", "1.0.0", requires_dist=["!!!invalid!!!"])
@@ -124,7 +124,7 @@ def test_execute_skips_wheel_with_invalid_requirement(tmp_path, capsys):
 
 
 def test_execute_skips_platform_specific_wheel(tmp_path, capsys):
-    """A platform-specific wheel cannot be converted to a repodata entry and is skipped."""
+    """Test that a platform-specific wheel cannot be converted to a repodata entry and is skipped."""
     pkg_dir = tmp_path / "bad-package"
     pkg_dir.mkdir()
     make_wheel(pkg_dir, "bad_package", "1.0.0", platform="cp311-win_amd64")
@@ -135,3 +135,15 @@ def test_execute_skips_platform_specific_wheel(tmp_path, capsys):
     assert result == 0
     captured = capsys.readouterr()
     assert "not a pure-python whee" in captured.out
+
+
+def test_base_url_is_passed(tmp_path):
+    """Test that if `--base-url` is passed, it is used to construct the URL for each entry in repodata.json"""
+    shutil.copytree(here / "pypi_local_index", tmp_path / "pypi_local_index")
+    args = Namespace(directory=tmp_path / "pypi_local_index", base_url="https://example.com/")
+    result = execute(args)
+
+    assert result == 0
+    repodata = json.loads((tmp_path / "pypi_local_index" / "noarch" / "repodata.json").read_text())
+    for entry in repodata["v3"]["whl"].values():
+        assert entry["url"].startswith("https://example.com/")
