@@ -134,7 +134,7 @@ def test_execute_skips_platform_specific_wheel(tmp_path, capsys):
 
     assert result == 0
     captured = capsys.readouterr()
-    assert "not a pure-python whee" in captured.out
+    assert "not a pure-python wheel" in captured.out
 
 
 def test_base_url_is_passed(tmp_path):
