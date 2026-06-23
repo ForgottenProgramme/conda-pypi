@@ -174,6 +174,22 @@ conda pypi convert -d ./my_packages niquests rope
 This is useful for creating conda packages from PyPI distributions or
 preparing packages for offline installation.
 
+### Indexing a local wheel directory
+
+If you have a collection of `.whl` files locally, you can turn the
+directory into a conda channel using `conda pypi index`:
+
+```bash
+conda pypi index path/to/my_wheels/
+```
+
+Once indexed, use it as a regular local channel:
+
+```bash
+conda install -c file:///path/to/my_wheels some-package
+```
+
+
 ### Development and editable installations
 
 `conda-pypi` supports editable installations for development workflows:

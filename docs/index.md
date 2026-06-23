@@ -18,12 +18,13 @@ with the `conda-pypi` channel (hosted by Anaconda) and the Rattler solver,
 the tool makes pure Python packages from PyPI available through
 the `conda install` command, with no extra conversion needed.
 
-The tool also offers two main commands for more advanced usage: `conda pypi install`
+The tool also offers three commands for more advanced usage: `conda pypi install`
 for safer PyPI package installation with an intelligent hybrid approach,
 and `conda pypi convert` for converting PyPI packages to `.conda` format
 without installing them. The smart installation strategy ensures that
 explicitly requested packages come from PyPI while dependencies are sourced
-from conda channels when available.
+from conda channels when available. The `conda pypi index` command is provided
+for indexing a local directory of `.whl` files to create a local conda channel.
 
 `conda-pypi` includes support for development workflows through editable
 installations with the `-e` flag for local project directories.

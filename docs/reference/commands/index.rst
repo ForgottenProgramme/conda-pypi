@@ -18,3 +18,4 @@ The following commands are part of conda-pypi:
 
    install
    convert
+   index_subcommand
