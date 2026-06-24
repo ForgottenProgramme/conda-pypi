@@ -133,7 +133,6 @@ conda pypi install build
 
 This will download and convert the `build` package from PyPI to `.conda`
 format. Even though `python-build` exists on conda, the explicitly requested
-Even though `python-build` exists on conda, the explicitly requested
 package always comes from PyPI to ensure you get exactly what you asked for.
 However, its dependencies will preferentially come from conda channels when
 available.
@@ -173,6 +172,28 @@ conda pypi convert -d ./my_packages niquests rope
 
 This is useful for creating conda packages from PyPI distributions or
 preparing packages for offline installation.
+
+### Indexing a local wheel directory
+
+If you have a collection of `.whl` files locally, you can turn the
+directory into a conda channel using `conda pypi index`. Wheels must sit in per-package subdirectories (not directly in the channel root), and only pure Python (`py3-none-any`) wheels are indexed.
+
+```
+my_wheels/
+  requests/
+    requests-2.32.0-py3-none-any.whl
+```
+
+```bash
+conda pypi index path/to/my_wheels/
+```
+
+Once indexed, use it as a regular local channel:
+
+```bash
+conda install -c file:///path/to/my_wheels some-package
+```
+
 
 ### Development and editable installations
 

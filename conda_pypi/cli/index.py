@@ -22,7 +22,13 @@ def configure_parser(parser: _SubParsersAction) -> None:
     epilog = dals("""
     Creates a local conda channel from a collection of wheel files.
     Examples:
-    `conda pypi index <directory>`
+    Index a directory of wheel files to create a local conda channel::
+
+    conda pypi index path/to/my_wheels/
+
+  Use the generated channel with conda::
+
+    conda install -c file:///path/to/my_wheels some-package
     """)
     index = parser.add_parser(
         "index",
