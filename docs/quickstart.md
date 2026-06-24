@@ -177,7 +177,7 @@ preparing packages for offline installation.
 ### Indexing a local wheel directory
 
 If you have a collection of `.whl` files locally, you can turn the
-directory into a conda channel using `conda pypi index`:
+directory into a conda channel using `conda pypi index`. Wheels must sit in per-package subdirectories (not directly in the channel root), and only pure Python (`py3-none-any`) wheels are indexed.
 
 ```bash
 conda pypi index path/to/my_wheels/
