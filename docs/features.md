@@ -109,13 +109,13 @@ The `index` subcommand scans a directory of pure Python wheel (`.whl`) files,
 extracts their metadata, and generates a `repodata.json` so the directory
 can be used as a local conda channel. Wheels must be in-per package subdirectories under the channel root. This is useful for offline environments where you want to serve wheels through conda's normal channel machinery.
 
-````bash
+```bash
 # Index a directory of wheels
 conda pypi index path/to/my_wheels/
 
 # Then use the directory as a local channel
 conda install -c file:///path/to/my_wheels some-package
-````
+```
 
 ### PyPI-to-conda conversion engine
 
