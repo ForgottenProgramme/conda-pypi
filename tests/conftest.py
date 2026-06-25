@@ -1,7 +1,7 @@
+import shutil
 from pathlib import Path
 
 import pytest
-import shutil
 from conda.base.context import context, reset_context
 from conda.testing import http_test_server
 from conda.testing.fixtures import CondaCLIFixture
@@ -126,9 +126,11 @@ def wheels_local_channel(tmp_path_factory, session_conda_cli):
     base_url = f"http://{host}:{port}/"
 
     session_conda_cli(
-        "pypi", "index",
+        "pypi",
+        "index",
         str(channel_dir),
-        "--base-url", base_url,
+        "--base-url",
+        base_url,
     )
 
     yield f"http://{host}:{port}"
