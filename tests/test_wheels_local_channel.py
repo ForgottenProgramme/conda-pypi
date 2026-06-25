@@ -30,7 +30,5 @@ def test_install_demo_package_from_wheels_local_channel(
         "demo-package",
         "--channel",
         wheels_local_channel,
-        "--channel",
-        conda_local_channel,
     ) as prefix:
         assert (prefix / "conda-meta").is_dir()
