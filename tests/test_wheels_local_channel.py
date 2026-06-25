@@ -32,6 +32,5 @@ def test_install_demo_package_from_wheels_local_channel(
         wheels_local_channel,
         "--channel",
         conda_local_channel,
-        "--override-channels",
     ) as prefix:
         assert (prefix / "conda-meta").is_dir()
