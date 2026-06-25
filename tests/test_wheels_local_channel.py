@@ -21,7 +21,7 @@ def test_wheels_local_channel_urls_are_local(wheels_local_channel):
 
 
 def test_install_demo_package_from_wheels_local_channel(
-    wheels_local_channel, with_rattler_solver, tmp_env: TmpEnvFixture
+    wheels_local_channel, with_rattler_solver, tmp_env: TmpEnvFixture, conda_local_channel
 ):
     """
     Test that demo-package can be installed from the local wheel channel using Rattler.
@@ -30,6 +30,8 @@ def test_install_demo_package_from_wheels_local_channel(
         "demo-package",
         "--channel",
         wheels_local_channel,
+        "--channel",
+        conda_local_channel,
         "--override-channels",
     ) as prefix:
         assert (prefix / "conda-meta").is_dir()
