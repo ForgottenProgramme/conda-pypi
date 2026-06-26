@@ -24,7 +24,6 @@ def test_install_demo_package_from_wheels_local_channel(
     wheels_local_channel,
     with_rattler_solver,
     tmp_env: TmpEnvFixture,
-    conda_local_channel,
     conda_cli,
 ):
     """
