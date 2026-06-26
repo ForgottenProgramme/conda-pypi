@@ -1,16 +1,23 @@
+from __future__ import annotations
+
 import json
+from email.parser import HeaderParser
+from logging import getLogger
 from os import PathLike
 from pathlib import Path
-from typing import BinaryIO, Iterable, Literal, Tuple
+from typing import TYPE_CHECKING, BinaryIO, Iterable, Literal, Tuple
 
 import installer.utils
 from installer.destinations import WheelDestination
 from installer.records import Hash, RecordEntry
 from installer.sources import WheelFile
-from installer.utils import Scheme
+from installer.utils import Scheme, parse_wheel_filename
+from packaging.tags import parse_tag
 
 from conda_pypi.license_files import copy_into_info_licenses, package_metadata_from_metadata_body
 from conda_pypi.utils import sha256_base64url_to_hex
+
+logger = getLogger(__name__)
 
 # Maps wheel scheme names to their conda package directory prefix.
 # An empty string means files go directly under the package root (env prefix).
@@ -22,6 +29,45 @@ SCHEME_TO_CONDA_PREFIX: dict[Scheme, str] = {
     "headers": "include",
 }
 
+if TYPE_CHECKING:
+    from email.message import Message
+
+
+def _create_build_string_from_wheel_meta_and_filename(
+    wheel_meta: Message,
+    wheel_filename: str,
+) -> tuple[str, int]:
+    """Create a build string and number from wheel metadata and filename.
+
+    Wheel metadata (the WHEEL file) is the primary source and filename is secondary.
+    Some normalization is applied for compatibility with repodata v3.
+    """
+    tag_lines = wheel_meta.get_all("Tag") or []
+    # WHEEL lists expanded tags; filenames may compress (py2.py3-none-any).
+    if tag_lines:
+        tag_candidates = tag_lines
+    else:
+        # parse_tag will expand the compressed tag format (py2.py3-none-any) to a list of tags.
+        tag_candidates = [str(t) for t in parse_tag(parse_wheel_filename(wheel_filename).tag)]
+    # Prefer py3-none-any to match repodata v3.
+    wheel_tag = "py3-none-any" if "py3-none-any" in tag_candidates else max(tag_candidates)
+    # Normalize noarch tags to py3-none-any to match repodata v3.
+    if wheel_tag != "py3-none-any" and wheel_tag.endswith("-none-any"):
+        logger.info(
+            "Normalizing wheel tag %s to py3-none-any for index.json build "
+            "(matches repodata v3 noarch convention)",
+            wheel_tag,
+        )
+        wheel_tag = "py3-none-any"
+
+    build_number = 0
+    wheel_build = wheel_meta.get("Build")
+    if wheel_build is not None and wheel_build.isdigit():
+        build_number = int(wheel_build)
+
+    build_string = f"{wheel_tag.replace('-', '_')}_{build_number}"
+    return build_string, build_number
+
 
 # inline version of
 # from conda.gateways.disk.create import write_as_json_to_file
@@ -31,8 +77,14 @@ def write_as_json_to_file(file_path, obj):
 
 
 class MyWheelDestination(WheelDestination):
-    def __init__(self, target_full_path: str | Path, source: WheelFile):
+    def __init__(
+        self,
+        target_full_path: str | Path,
+        source: WheelFile,
+        whl_full_path: str | Path,
+    ):
         self.target_full_path = Path(target_full_path)
+        self.whl_full_path = Path(whl_full_path)
         self.sp_dir = self.target_full_path / "site-packages"
         self.entry_points = []
         self.source = source
@@ -117,21 +169,23 @@ class MyWheelDestination(WheelDestination):
         }
         write_as_json_to_file(info_dir / "paths.json", paths_json_data)
 
-        # index.json
-        # Set fn to include the build string AND extension so _get_json_fn() works correctly
-        # Format: name-version-build.whl (e.g., "requests-2.28.0-pypi_0.whl")
-        # The extension is required because _get_json_fn() uses endswith() to detect package type
+        # index.json — fn from wheel path; Tag and Build from WHEEL dist-info.
         package_name = str(source.distribution)
         package_version = str(source.version)
-        build_string = "pypi_0"
-        fn = f"{package_name}-{package_version}-{build_string}.whl"
+        wheel_filename = self.whl_full_path.name
+
+        wheel_meta = HeaderParser().parsestr(source.read_dist_info("WHEEL"))
+
+        build_string, build_number = _create_build_string_from_wheel_meta_and_filename(
+            wheel_meta, wheel_filename
+        )
 
         index_json_data = {
             "name": package_name,
             "version": package_version,
             "build": build_string,
-            "build_number": 0,
-            "fn": fn,
+            "build_number": build_number,
+            "fn": wheel_filename,
         }
         write_as_json_to_file(info_dir / "index.json", index_json_data)
 
@@ -164,9 +218,10 @@ class MyWheelDestination(WheelDestination):
 
 
 def extract_whl_as_conda_pkg(whl_full_path: str | Path, target_full_path: str | Path):
+    whl_full_path = Path(whl_full_path)
     with WheelFile.open(whl_full_path) as source:
         installer.install(
             source=source,
-            destination=MyWheelDestination(target_full_path, source),
+            destination=MyWheelDestination(target_full_path, source, whl_full_path),
             additional_metadata={"INSTALLER": b"conda-via-whl"},
         )
