@@ -42,5 +42,5 @@ def test_install_demo_package_from_wheels_local_channel(
         )
         assert rc == 0, f"Failed to install from wheel channel: {err}"
         assert (prefix / "conda-meta").is_dir()
-        records = list((prefix / "conda-meta").glob("demo_package-*.json"))
+        records = list((prefix / "conda-meta").glob("demo-package-*.json"))
         assert records, "demo-package was not installed"
