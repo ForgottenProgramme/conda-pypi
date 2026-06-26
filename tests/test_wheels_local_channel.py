@@ -21,14 +21,26 @@ def test_wheels_local_channel_urls_are_local(wheels_local_channel):
 
 
 def test_install_demo_package_from_wheels_local_channel(
-    wheels_local_channel, with_rattler_solver, tmp_env: TmpEnvFixture, conda_local_channel
+    wheels_local_channel,
+    with_rattler_solver,
+    tmp_env: TmpEnvFixture,
+    conda_local_channel,
+    conda_cli,
 ):
     """
     Test that demo-package can be installed from the local wheel channel using Rattler.
     """
-    with tmp_env(
-        "demo-package",
-        "--channel",
-        wheels_local_channel,
-    ) as prefix:
+    with tmp_env("python=3.12") as prefix:
+        out, err, rc = conda_cli(
+            "install",
+            "demo-package",
+            "--prefix",
+            prefix,
+            "--channel",
+            wheels_local_channel,
+            "--yes",
+        )
+        assert rc == 0, f"Failed to install from wheel channel: {err}"
         assert (prefix / "conda-meta").is_dir()
+        records = list((prefix / "conda-meta").glob("demo_package-*.json"))
+        assert records, "demo-package was not installed"
