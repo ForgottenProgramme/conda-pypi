@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 import pytest
@@ -114,3 +115,24 @@ def channel_index_with_wheels(tmp_path: Path) -> ChannelIndex:
         write_current_repodata=False,
         cache_kwargs={"package_extensions": CONDA_PACKAGE_EXTENSIONS + (".whl",)},
     )
+
+
+@pytest.fixture(scope="session")
+def wheels_local_channel(tmp_path_factory, session_conda_cli):
+    channel_dir = tmp_path_factory.mktemp("wheels_local_channel")
+    shutil.copytree(PYPI_LOCAL_INDEX, channel_dir, dirs_exist_ok=True)
+    http = http_test_server.run_test_server(str(channel_dir))
+    host, port = http.socket.getsockname()
+    base_url = f"http://{host}:{port}/"
+
+    session_conda_cli(
+        "pypi",
+        "index",
+        str(channel_dir),
+        "--base-url",
+        base_url,
+    )
+
+    yield f"http://{host}:{port}"
+
+    http.shutdown()
