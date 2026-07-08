@@ -46,7 +46,10 @@ def conda_package_extractors():
 
 @hookimpl
 def conda_health_checks():
-    from conda_pypi.health_checks.external_packages import migrate_to_conda, print_external_packages
+    from conda_pypi.health_checks.external_packages import (
+        migrate_to_conda,
+        print_external_packages,
+    )
 
     yield CondaHealthCheck(
         name="external-packages",
