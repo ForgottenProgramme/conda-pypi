@@ -107,14 +107,13 @@ def execute(args: Namespace) -> int:
     from conda.exceptions import ArgumentError
     from conda.models.match_spec import MatchSpec
     from packaging.requirements import InvalidRequirement, Requirement
-    
+
     from conda_pypi import build, convert_tree, installer
     from conda_pypi.downloader import get_package_finder
     from conda_pypi.main import run_conda_install
     from conda_pypi.markers import dependency_extras_suffix
     from conda_pypi.translate import pypi_to_conda_name, remap_match_spec_name
     from conda_pypi.utils import get_prefix
-
 
     editable_projects = args.editable or ()
     if isinstance(editable_projects, str):

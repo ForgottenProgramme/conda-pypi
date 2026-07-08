@@ -8,7 +8,6 @@ import json
 import re
 from argparse import Namespace
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 from conda.base.context import reset_context
@@ -185,7 +184,12 @@ def test_install_editable_installs_multiple_projects_in_order(
     calls.attach_mock(build_editable, "build")
     calls.attach_mock(install_package, "install")
 
-    assert install_cli.execute(editable_args(first, editable=[str(first), str(second)], ignore_channels=True)) == 0
+    assert (
+        install_cli.execute(
+            editable_args(first, editable=[str(first), str(second)], ignore_channels=True)
+        )
+        == 0
+    )
 
     assert calls.mock_calls == [
         mocker.call.build(
