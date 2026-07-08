@@ -77,12 +77,14 @@ def test_install_editable_dry_run_reports_each_project(
     first.mkdir()
     second.mkdir()
 
-    monkeypatch.setattr(install_cli, "context", SimpleNamespace(json=False, channels=()))
-    monkeypatch.setattr(install_cli, "get_prefix", lambda: prefix)
+    monkeypatch.setenv("CONDA_JSON", "false")
+    reset_context()
+    # monkeypatch.setattr("conda.base.context.context", SimpleNamespace(json=False, channels=()))
+    monkeypatch.setattr("conda_pypi.utils.get_prefix", lambda: prefix)
     build_editable = mocker.Mock()
     install_package = mocker.Mock()
-    monkeypatch.setattr(install_cli.build, "pypa_to_conda", build_editable)
-    monkeypatch.setattr(install_cli.installer, "install_ephemeral_conda", install_package)
+    monkeypatch.setattr("conda_pypi.build.pypa_to_conda", build_editable)
+    monkeypatch.setattr("conda_pypi.installer.install_ephemeral_conda", install_package)
 
     assert (
         install_cli.execute(editable_args(first, editable=[str(first), str(second)], dry_run=True))
@@ -144,12 +146,14 @@ def test_install_editable_passes_prompt_state_to_mutating_steps(
     package = tmp_path / "editable.conda"
     project.mkdir()
 
-    monkeypatch.setattr(install_cli, "get_prefix", lambda: prefix)
-    monkeypatch.setattr(install_cli, "context", SimpleNamespace(json=False, channels=()))
+    monkeypatch.setenv("CONDA_JSON", "false")
+    reset_context()
+    # monkeypatch.setattr("conda.base.context.context", SimpleNamespace(json=False, channels=()))
+    monkeypatch.setattr("conda_pypi.utils.get_prefix", lambda: prefix)
     build_editable = mocker.Mock(return_value=package)
     install_package = mocker.Mock()
-    monkeypatch.setattr(install_cli.build, "pypa_to_conda", build_editable)
-    monkeypatch.setattr(install_cli.installer, "install_ephemeral_conda", install_package)
+    monkeypatch.setattr("conda_pypi.build.pypa_to_conda", build_editable)
+    monkeypatch.setattr("conda_pypi.installer.install_ephemeral_conda", install_package)
 
     assert install_cli.execute(editable_args(project, yes=yes)) == 0
 
@@ -169,17 +173,19 @@ def test_install_editable_installs_multiple_projects_in_order(
     first.mkdir()
     second.mkdir()
 
-    monkeypatch.setattr(install_cli, "get_prefix", lambda: prefix)
-    monkeypatch.setattr(install_cli, "context", SimpleNamespace(json=False, channels=()))
+    monkeypatch.setattr("conda_pypi.utils.get_prefix", lambda: prefix)
+    monkeypatch.setenv("CONDA_JSON", "false")
+    reset_context()
+    # monkeypatch.setattr("conda.base.context.context", SimpleNamespace(json=False, channels=()))
     build_editable = mocker.Mock(side_effect=[first_package, second_package])
     install_package = mocker.Mock()
-    monkeypatch.setattr(install_cli.build, "pypa_to_conda", build_editable)
-    monkeypatch.setattr(install_cli.installer, "install_ephemeral_conda", install_package)
+    monkeypatch.setattr("conda_pypi.build.pypa_to_conda", build_editable)
+    monkeypatch.setattr("conda_pypi.installer.install_ephemeral_conda", install_package)
     calls = mocker.Mock()
     calls.attach_mock(build_editable, "build")
     calls.attach_mock(install_package, "install")
 
-    assert install_cli.execute(editable_args(first, editable=[str(first), str(second)])) == 0
+    assert install_cli.execute(editable_args(first, editable=[str(first), str(second)], ignore_channels=True)) == 0
 
     assert calls.mock_calls == [
         mocker.call.build(
