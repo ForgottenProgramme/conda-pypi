@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from conda.common.configuration import PrimitiveParameter
 from conda.plugins import hookimpl
 from conda.plugins.types import (
     CondaHealthCheck,
@@ -10,14 +9,11 @@ from conda.plugins.types import (
     CondaSubcommand,
 )
 
-from conda_pypi import cli
-from conda_pypi.health_checks.external_packages import migrate_to_conda, print_external_packages
-from conda_pypi.main import notify_externally_managed_future
-from conda_pypi.package_extractors.whl import extract_whl_as_conda_pkg
-
 
 @hookimpl
 def conda_subcommands():
+    from conda_pypi import cli
+
     yield CondaSubcommand(
         name="pypi",
         action=cli.main.execute,
@@ -28,6 +24,8 @@ def conda_subcommands():
 
 @hookimpl
 def conda_post_commands():
+    from conda_pypi.main import notify_externally_managed_future
+
     yield CondaPostCommand(
         name="conda-pypi-notify-externally-managed-future",
         action=notify_externally_managed_future,
@@ -37,6 +35,8 @@ def conda_post_commands():
 
 @hookimpl
 def conda_package_extractors():
+    from conda_pypi.package_extractors.whl import extract_whl_as_conda_pkg
+
     yield CondaPackageExtractor(
         name="wheel-package",
         extensions=[".whl"],
@@ -46,6 +46,8 @@ def conda_package_extractors():
 
 @hookimpl
 def conda_health_checks():
+    from conda_pypi.health_checks.external_packages import migrate_to_conda, print_external_packages
+
     yield CondaHealthCheck(
         name="external-packages",
         action=print_external_packages,
@@ -56,6 +58,8 @@ def conda_health_checks():
 
 @hookimpl
 def conda_settings():
+    from conda.common.configuration import PrimitiveParameter
+
     yield CondaSetting(
         name="conda_pypi_pip_warning",
         description="Enable or disable the conda-pypi beta tip shown when pip is present",
