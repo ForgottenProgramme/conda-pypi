@@ -6,7 +6,6 @@ from conda.plugins.types import CondaSetting
 from conda.testing.fixtures import CondaCLIFixture, TmpEnvFixture
 from pytest_mock import MockerFixture
 
-from conda_pypi import plugin
 from conda_pypi.main import notify_externally_managed_future
 from conda_pypi.package_extractors import whl
 from conda_pypi.plugin import conda_settings
@@ -45,8 +44,8 @@ def test_extract_whl_as_conda_called(
             return_value=("3.10", str(tmp_path)),
         )
 
-        # spy on the wheel extractor function in the plugin module
-        spy = mocker.spy(plugin, "extract_whl_as_conda_pkg")
+        # spy on the wheel extractor function
+        spy = mocker.spy(whl, "extract_whl_as_conda_pkg")
 
         # install package
         _, _, err = conda_cli("install", f"--prefix={prefix}", package)
