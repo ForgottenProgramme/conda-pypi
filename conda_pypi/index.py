@@ -16,15 +16,13 @@ def create_channel_index(path):
     channel_index = ChannelIndex(
         path,
         None,
-        repodata_v3=True,
-        save_fs_state=False,
         threads=1,
-        write_current_repodata=False,
         write_zst=True,
-        cache_kwargs={
-            "package_extensions": CONDA_PACKAGE_EXTENSIONS + (".whl",),
-            "include_stages": ["md"],
-        },
+        write_current_repodata=False,
+        repodata_v3=True,
+        cache_kwargs={"package_extensions": CONDA_PACKAGE_EXTENSIONS + (".whl",)},
+        update_only=True,
+        save_fs_state=False,
     )
     return channel_index
 
