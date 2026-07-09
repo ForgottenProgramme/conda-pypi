@@ -8,15 +8,10 @@ import shutil
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
-from conda.api import SubdirData
 from conda.base.constants import OK_MARK, X_MARK
-from conda.base.context import context
-from conda.cli.install import reinstall_packages
 from conda.common.constants import NULL
 from conda.core.prefix_data import PrefixData
 from conda.models.records import PrefixRecord
-
-from conda_pypi.name_mapping import pypi_to_conda_name
 
 if TYPE_CHECKING:
     from argparse import Namespace
@@ -45,6 +40,8 @@ def print_external_packages(prefix: str, verbose: bool) -> None:
 
 def conda_has_package(name: str) -> bool:
     """Check if a package with the given name exists in conda channels."""
+    from conda.api import SubdirData
+
     result = SubdirData.query_all(name)
     return bool(result)
 
@@ -53,6 +50,9 @@ def build_migration_plan(
     packages: list[PrefixRecord],
 ) -> tuple[list[str], list[PrefixRecord]]:
     """Determine which packages can be safely migrated to conda."""
+
+    from conda_pypi.name_mapping import pypi_to_conda_name
+
     safe_pkgs_conda_names = []
     safe_pkgs_pypi = []
 
@@ -124,6 +124,9 @@ def clean_up_stale_files(
 
 def migrate_to_conda(prefix: str, args: Namespace, confirm: ConfirmCallback) -> int:
     """Migrate pip-installed packages to conda."""
+
+    from conda.base.context import context
+    from conda.cli.install import reinstall_packages
 
     if prefix == context.root_prefix:
         print("Cannot migrate packages in the base environment.")
