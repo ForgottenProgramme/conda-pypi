@@ -1,18 +1,8 @@
-import zipfile
 from argparse import Namespace, _SubParsersAction
 from importlib.metadata import PackageMetadata
 from pathlib import Path
 
 from conda.auxlib.ish import dals
-from conda.exceptions import ArgumentError
-from installer.sources import WheelFile
-from packaging.requirements import InvalidRequirement
-
-from conda_pypi.conda_build_utils import sha256_checksum
-from conda_pypi.exceptions import UnableToConvertToRepodataEntry
-from conda_pypi.index import create_channel_index, store_pypi_metadata, update_index
-from conda_pypi.license_files import package_metadata_from_metadata_body
-
 
 def configure_parser(parser: _SubParsersAction) -> None:
     """Configure all subcommand arguments and options via argparse"""
@@ -53,6 +43,8 @@ def validate_dir_and_return_whl_files(directory: Path) -> list[Path]:
     Expected structure:
     root/
       <package>/ <package>-*.whl"""
+    
+    from conda.exceptions import ArgumentError
 
     if not directory.is_dir():
         raise ArgumentError(f"Not a directory: {directory}")
@@ -88,6 +80,7 @@ def validate_dir_and_return_whl_files(directory: Path) -> list[Path]:
 
 def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata, url: str):
     """Return expected dict structure of pypi metadata with the relevant fields"""
+    from conda_pypi.conda_build_utils import sha256_checksum
 
     # convert to json format using the `json` property of the PackageMetadata class
     wheel_metadata_json = wheel_metadata.json
@@ -114,6 +107,14 @@ def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata, url: str):
 
 def execute(args: Namespace) -> int:
     """Entry point for the `conda pypi index` subcommand"""
+    from packaging.requirements import InvalidRequirement
+    from installer.sources import WheelFile
+    import zipfile
+
+    from conda_pypi.exceptions import UnableToConvertToRepodataEntry
+    from conda_pypi.index import create_channel_index, store_pypi_metadata, update_index
+    from conda_pypi.license_files import package_metadata_from_metadata_body
+
 
     directory = Path(args.directory).expanduser()
 
