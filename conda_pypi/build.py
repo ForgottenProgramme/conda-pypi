@@ -20,11 +20,11 @@ from importlib.metadata import PathDistribution
 from pathlib import Path
 from typing import Iterable
 
-from build import ProjectBuilder
+from build import ProjectBuilder  # noqa: TID253
 from conda.common.compat import on_win
 from conda.common.path.windows import win_path_to_unix
 from conda_package_streaming.create import conda_builder
-from installer.utils import parse_wheel_filename
+from installer.utils import parse_wheel_filename  # noqa: TID253
 
 from conda_pypi import dependencies, installer, paths
 from conda_pypi.conda_build_utils import PathType, sha256_checksum

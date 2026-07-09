@@ -9,7 +9,7 @@ from pathlib import Path
 from conda.core.prefix_data import PrefixData
 from conda.gateways.connection.download import download
 from conda.models.match_spec import MatchSpec
-from unearth import PackageFinder, TargetPython
+from unearth import PackageFinder, TargetPython  # noqa: TID253
 
 from conda_pypi.exceptions import CondaPypiError
 from conda_pypi.translate import conda_to_requires

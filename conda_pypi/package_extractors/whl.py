@@ -7,11 +7,11 @@ from os import PathLike
 from pathlib import Path
 from typing import TYPE_CHECKING, BinaryIO, Iterable, Literal, Tuple
 
-import installer.utils
-from installer.destinations import WheelDestination
-from installer.records import Hash, RecordEntry
-from installer.sources import WheelFile
-from installer.utils import Scheme, parse_wheel_filename
+import installer.utils  # noqa: TID253
+from installer.destinations import WheelDestination  # noqa: TID253
+from installer.records import Hash, RecordEntry  # noqa: TID253
+from installer.sources import WheelFile  # noqa: TID253
+from installer.utils import Scheme, parse_wheel_filename  # noqa: TID253
 from packaging.tags import parse_tag
 
 from conda_pypi.license_files import copy_into_info_licenses, package_metadata_from_metadata_body

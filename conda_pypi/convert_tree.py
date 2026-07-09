@@ -23,8 +23,8 @@ from conda.models.channel import Channel
 from conda.models.match_spec import MatchSpec
 from conda.models.records import PrefixRecord
 from conda.reporters import get_spinner
-from conda_index.index import ChannelIndex
-from unearth import PackageFinder
+from conda_index.index import ChannelIndex  # noqa: TID253
+from unearth import PackageFinder  # noqa: TID253
 
 from conda_pypi.build import build_conda
 from conda_pypi.downloader import find_and_fetch, get_package_finder

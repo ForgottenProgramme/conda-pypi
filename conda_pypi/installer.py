@@ -17,11 +17,11 @@ from unittest.mock import patch
 from conda.cli.install import confirm_yn
 from conda.cli.main import main_subshell
 from conda.core.package_cache_data import PackageCacheData
-from installer import install
-from installer.destinations import SchemeDictionaryDestination
-from installer.records import Hash, RecordEntry
-from installer.sources import WheelFile
-from installer.utils import Scheme, construct_record_file, copyfileobj_with_hashing
+from installer import install  # noqa: TID253
+from installer.destinations import SchemeDictionaryDestination  # noqa: TID253
+from installer.records import Hash, RecordEntry  # noqa: TID253
+from installer.sources import WheelFile  # noqa: TID253
+from installer.utils import Scheme, construct_record_file, copyfileobj_with_hashing  # noqa: TID253
 
 from conda_pypi.conda_build_utils import PathType
 

@@ -4,9 +4,9 @@ Interface to conda-index.
 
 from typing import Any
 
-from conda_index.index import ChannelIndex
-from conda_index.index.cache import BaseCondaIndexCache
-from conda_index.utils import CONDA_PACKAGE_EXTENSIONS
+from conda_index.index import ChannelIndex  # noqa: TID253
+from conda_index.index.cache import BaseCondaIndexCache  # noqa: TID253
+from conda_index.utils import CONDA_PACKAGE_EXTENSIONS  # noqa: TID253
 
 from conda_pypi.exceptions import UnableToConvertToRepodataEntry
 from conda_pypi.pypi_metadata import pypi_to_repodata

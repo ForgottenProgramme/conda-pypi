@@ -8,7 +8,7 @@ translation; but this one supports extras and the format in pyproject.toml.
 import json
 import sys
 
-import build
+import build  # noqa: TID253
 
 
 def check_dependencies(build_system_requires):
