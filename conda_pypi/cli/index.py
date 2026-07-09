@@ -4,6 +4,7 @@ from pathlib import Path
 
 from conda.auxlib.ish import dals
 
+
 def configure_parser(parser: _SubParsersAction) -> None:
     """Configure all subcommand arguments and options via argparse"""
 
@@ -43,7 +44,7 @@ def validate_dir_and_return_whl_files(directory: Path) -> list[Path]:
     Expected structure:
     root/
       <package>/ <package>-*.whl"""
-    
+
     from conda.exceptions import ArgumentError
 
     if not directory.is_dir():
@@ -107,14 +108,14 @@ def pypi_data_dict(wheel: Path, wheel_metadata: PackageMetadata, url: str):
 
 def execute(args: Namespace) -> int:
     """Entry point for the `conda pypi index` subcommand"""
-    from packaging.requirements import InvalidRequirement
-    from installer.sources import WheelFile
     import zipfile
+
+    from installer.sources import WheelFile
+    from packaging.requirements import InvalidRequirement
 
     from conda_pypi.exceptions import UnableToConvertToRepodataEntry
     from conda_pypi.index import create_channel_index, store_pypi_metadata, update_index
     from conda_pypi.license_files import package_metadata_from_metadata_body
-
 
     directory = Path(args.directory).expanduser()
 

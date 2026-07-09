@@ -6,7 +6,6 @@ from conda.plugins.types import CondaSetting
 from conda.testing.fixtures import CondaCLIFixture, TmpEnvFixture
 from pytest_mock import MockerFixture
 
-from conda_pypi import plugin
 from conda_pypi.main import notify_externally_managed_future
 from conda_pypi.package_extractors import whl
 from conda_pypi.plugin import conda_settings
