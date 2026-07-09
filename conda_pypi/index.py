@@ -57,14 +57,13 @@ def store_pypi_metadata(cache: BaseCondaIndexCache, pypi_json: dict[str, Any]):
     path = f"{repodata_entry['name']}-{repodata_entry['version']}-py3_none_any_0.whl"
 
     cache.store_fs_state(
-        "md",
         [
             {
                 "path": cache.database_path(path),
                 "size": repodata_entry["size"],
                 "mtime": repodata_entry.get("timestamp", 0),
             }
-        ],
+        ]
     )
 
     # must contain sha256 and md5 keys but values may be None
