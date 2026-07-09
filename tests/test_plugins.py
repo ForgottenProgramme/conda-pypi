@@ -45,8 +45,8 @@ def test_extract_whl_as_conda_called(
             return_value=("3.10", str(tmp_path)),
         )
 
-        # spy on the wheel extractor function in the plugin module
-        spy = mocker.spy(plugin, "extract_whl_as_conda_pkg")
+        # spy on the wheel extractor function
+        spy = mocker.spy(whl, "extract_whl_as_conda_pkg")
 
         # install package
         _, _, err = conda_cli("install", f"--prefix={prefix}", package)
