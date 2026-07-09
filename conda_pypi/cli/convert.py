@@ -1,14 +1,7 @@
-import json
 from argparse import Namespace, _SubParsersAction
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from conda.auxlib.ish import dals
-from conda.base.context import context
-from conda.exceptions import ArgumentError
-
-from conda_pypi import build, paths
-from conda_pypi.translate import validate_name_mapping_format
 
 
 def configure_parser(parser: _SubParsersAction) -> None:
@@ -97,6 +90,16 @@ def execute(args: Namespace) -> int:
     """
     Entry point for the `conda pypi convert` subcommand
     """
+
+    import json
+    from tempfile import TemporaryDirectory
+
+    from conda.base.context import context
+    from conda.exceptions import ArgumentError
+
+    from conda_pypi import build, paths
+    from conda_pypi.translate import validate_name_mapping_format
+
     prefix_path = Path(context.target_prefix)
     if not Path(args.project_path).exists():
         raise ArgumentError("PROJECT must be a local path to a sdist, wheel or directory.")
