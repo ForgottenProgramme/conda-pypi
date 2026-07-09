@@ -56,7 +56,7 @@ def store_pypi_metadata(cache: BaseCondaIndexCache, pypi_json: dict[str, Any]):
         )
     path = f"{repodata_entry['name']}-{repodata_entry['version']}-py3_none_any_0.whl"
 
-    cache.store_stat_state(
+    cache.store_fs_state(
         "md",
         [
             {
