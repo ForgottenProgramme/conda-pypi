@@ -119,8 +119,7 @@ def execute(args: Namespace) -> int:
 
     directory = Path(args.directory).expanduser()
 
-    if args.base_url:
-        base_url = args.base_url.rstrip("/") + "/"
+    base_url = args.base_url.rstrip("/") + "/" if args.base_url else ""
 
     all_wheels = validate_dir_and_return_whl_files(directory)
     failed_wheels = []
@@ -129,18 +128,22 @@ def execute(args: Namespace) -> int:
     channel_index = create_channel_index(directory)
     cache = channel_index.cache_for_subdir("noarch")
 
+    # Collect stat entries to store them all at once
+    stat_entries = []
+
     for wheel in all_wheels:
         try:
             with WheelFile.open(wheel) as source:
                 wheel_metadata = package_metadata_from_metadata_body(
                     source.read_dist_info("METADATA")
                 )
-            if args.base_url:
+            if base_url:
                 url = base_url + wheel.relative_to(directory).as_posix()
             else:
                 url = wheel.resolve().as_uri()
             pypi_data = pypi_data_dict(wheel, wheel_metadata, url)
-            store_pypi_metadata(cache, pypi_data)
+            stat_entry = store_pypi_metadata(cache, pypi_data)
+            stat_entries.append(stat_entry)
         except UnableToConvertToRepodataEntry as e:
             print(f"Skipping {wheel.name}: not a pure-python wheel ({e})")
             failed_wheels.append(wheel)
@@ -154,6 +157,11 @@ def execute(args: Namespace) -> int:
             print(f"Failed to read {wheel.name}: {e}")
             failed_wheels.append(wheel)
 
+    # Store all stat entries in the 'md' stage in one batch
+    if stat_entries:
+        cache.store_stat_state("md", stat_entries)
+
+    # Generate repodata from cached entries
     update_index(channel_index)
 
     # inform user about wheels that couldn't be indexed
