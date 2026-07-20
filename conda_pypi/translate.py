@@ -110,7 +110,7 @@ class PackageRecord:
             "build_number": self.build_number,
             "build": self.build,
             "depends": self.depends,
-            "extras": self.extras,
+            "extra_depends": self.extras,
             "license_family": self.license_family,
             "license": self.license,
             "name": self.name,

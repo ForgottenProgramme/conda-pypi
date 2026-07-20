@@ -217,3 +217,19 @@ def test_about_extra_generator_records_conda_pypi_version():
     about = CondaMetadata.from_distribution(dist).about
     assert about["extra"]["generator"] == "conda-pypi"
     assert about["extra"]["generator_version"] == __version__
+
+
+def test_to_index_json_uses_extra_depends_key():
+    """PackageRecord.to_index_json must serialize extras under extra_depends (CEP 44)."""
+    from conda_pypi.translate import PackageRecord
+
+    record = PackageRecord(
+        name="demo",
+        version="1.0.0",
+        subdir="noarch",
+        depends=["requests"],
+        extras={"security": ["pyopenssl"]},
+    )
+    index_json = record.to_index_json()
+    assert index_json["extra_depends"] == {"security": ["pyopenssl"]}
+    assert "extras" not in index_json
