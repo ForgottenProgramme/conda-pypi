@@ -169,7 +169,7 @@ def execute(args: Namespace) -> int:
         return 0
 
     deprecated.topic(
-        "25.11",
+        "27.3",
         "27.9",
         deprecation_type=FutureWarning,
         topic="`conda pypi install` for package installs",
