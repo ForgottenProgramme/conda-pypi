@@ -215,32 +215,34 @@ def test_install_editable_installs_multiple_projects_in_order(
 
 def test_index_urls(tmp_env, conda_cli, pypi_local_index):
     with tmp_env("python=3.10") as prefix:
-        out, err, rc = conda_cli(
-            "pypi",
-            "--yes",
-            "install",
-            "--ignore-channels",
-            "--prefix",
-            prefix,
-            "--index-url",
-            pypi_local_index,
-            "demo-package",
-        )
+        with pytest.deprecated_call():
+            out, err, rc = conda_cli(
+                "pypi",
+                "--yes",
+                "install",
+                "--ignore-channels",
+                "--prefix",
+                prefix,
+                "--index-url",
+                pypi_local_index,
+                "demo-package",
+            )
         assert "Converted packages\n - demo-package==0.1.0" in out
         assert rc == 0
 
 
 def test_install_output(tmp_env, conda_cli):
     with tmp_env("python=3.12") as prefix:
-        out, err, rc = conda_cli(
-            "pypi",
-            "--yes",
-            "install",
-            "--ignore-channels",
-            "--prefix",
-            prefix,
-            "scipy",
-        )
+        with pytest.deprecated_call():
+            out, err, rc = conda_cli(
+                "pypi",
+                "--yes",
+                "install",
+                "--ignore-channels",
+                "--prefix",
+                prefix,
+                "scipy",
+            )
 
         assert rc == 0
 
@@ -260,15 +262,16 @@ def test_install_output(tmp_env, conda_cli):
 
 def test_install_jupyterlab_package(tmp_env, conda_cli):
     with tmp_env("python=3.10") as prefix:
-        out, err, rc = conda_cli(
-            "pypi",
-            "--yes",
-            "install",
-            "--ignore-channels",
-            "--prefix",
-            prefix,
-            "jupyterlab",
-        )
+        with pytest.deprecated_call():
+            out, err, rc = conda_cli(
+                "pypi",
+                "--yes",
+                "install",
+                "--ignore-channels",
+                "--prefix",
+                prefix,
+                "jupyterlab",
+            )
         assert rc == 0
 
 
@@ -290,14 +293,15 @@ def test_json_output(tmp_env, monkeypatch, conda_cli):
     reset_context()
 
     with tmp_env("python=3.10") as prefix:
-        out, err, rc = conda_cli(
-            "pypi",
-            "--yes",
-            "install",
-            "--prefix",
-            prefix,
-            "imagesize",
-        )
+        with pytest.deprecated_call():
+            out, err, rc = conda_cli(
+                "pypi",
+                "--yes",
+                "install",
+                "--prefix",
+                prefix,
+                "imagesize",
+            )
         json_actions = json.loads(out)
         assert rc == 0
         assert json_actions["prefix"] == str(prefix)
@@ -311,16 +315,17 @@ def test_install_package_with_hyphens(tmp_env, conda_cli):
     and can be found by the solver after conversion.
     """
     with tmp_env("python=3.10") as prefix:
-        # Use a simple package with hyphens in the name
-        out, err, rc = conda_cli(
-            "pypi",
-            "--yes",
-            "install",
-            "--ignore-channels",
-            "--prefix",
-            prefix,
-            "typing-extensions",  # PyPI name with hyphen
-        )
+        with pytest.deprecated_call():
+            # Use a simple package with hyphens in the name
+            out, err, rc = conda_cli(
+                "pypi",
+                "--yes",
+                "install",
+                "--ignore-channels",
+                "--prefix",
+                prefix,
+                "typing-extensions",  # PyPI name with hyphen
+            )
 
         # Should succeed without PackagesNotFoundError
         assert rc == 0

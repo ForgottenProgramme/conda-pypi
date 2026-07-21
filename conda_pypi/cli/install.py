@@ -104,6 +104,7 @@ def execute(args: Namespace) -> int:
     """
     from conda.base.context import context
     from conda.cli.common import stdout_json_success
+    from conda.deprecations import deprecated
     from conda.exceptions import ArgumentError
     from conda.models.match_spec import MatchSpec
     from packaging.requirements import InvalidRequirement, Requirement
@@ -167,6 +168,13 @@ def execute(args: Namespace) -> int:
                 )
         return 0
 
+    deprecated.topic(
+        "25.11",
+        "27.9",
+        deprecation_type=FutureWarning,
+        topic="`conda pypi install` for package installs",
+        addendum="Use `conda install` with `conda-pypi` channel configuration instead.",
+    )
     if args.index_urls:
         index_urls = tuple(dict.fromkeys(args.index_urls))
         finder = get_package_finder(prefix_path, index_urls)
