@@ -12,7 +12,7 @@ workflows without requiring modifications to conda itself.
 The plugin registers several hooks with `conda`'s plugin system. The
 subcommand hook adds the `conda pypi` subcommand to conda through
 `conda_pypi.plugin.conda_subcommands()`, providing `conda pypi install`
-for installing PyPI packages with conversion, `conda pypi convert` for
+for installing PyPI packages with conversion (pending deprecation), `conda pypi convert` for
 converting PyPI packages without installing them, and `conda pypi index` for indexing a local directory of `.whl` files to create a local conda channel.
 
 The plugin also registers two post-command hooks that extend conda's

@@ -115,6 +115,12 @@ dependencies will be installed from conda rather than PyPI.
 
 ## Advanced usage
 
+:::{admonition} `conda pypi install` is pending deprecation
+:class: warning
+
+The `conda pypi install` command is pending deprecation and will be removed in version 27.9. Use `conda install` with `conda-pypi` channel configuration instead.
+:::
+
 You can also use the `conda pypi` command to install packages from
 PyPI without using the `conda-pypi` channel. This method downloads
 the package from PyPI and converts it to `.conda` format, then installs

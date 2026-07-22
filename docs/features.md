@@ -57,6 +57,12 @@ main subcommands that handle different aspects of PyPI integration.
 
 #### `conda pypi install`
 
+:::{admonition} `conda pypi install` is pending deprecation
+:class: warning
+
+The `conda pypi install` command is pending deprecation and will be removed in version 27.9. Use `conda install` with `conda-pypi` channel configuration instead.
+:::
+
 The install command takes PyPI packages and converts them to `.conda` format.
 Explicitly requested packages are always installed from PyPI and converted
 to `.conda` format to ensure you get exactly what you asked for. For
