@@ -61,10 +61,10 @@ def test_conda_pypi_install_matchspec_parsing(tmp_env: TmpEnvFixture, conda_cli:
 
         for spec in test_specs:
             with pytest.deprecated_call(match=r"`conda pypi install` for package installs"):
-                out, err, rc = conda_cli(
-                    "pypi", "-p", prefix, "--yes", "--dry-run", "install", spec, raises=DryRunExit
+                _, _, exc_info = conda_cli(
+                    "pypi", "-p", prefix, "--yes", "--dry-run", "install", spec
                 )
-            assert rc == 0, f"Failed to parse spec '{spec}'"
+            assert exc_info.type is DryRunExit
 
 
 def test_conda_pypi_install_requires_package_without_editable(
