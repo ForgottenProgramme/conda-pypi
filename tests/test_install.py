@@ -10,14 +10,15 @@ from conda.testing.fixtures import CondaCLIFixture, TmpEnvFixture
 def test_conda_pypi_install_basic(tmp_env: TmpEnvFixture, conda_cli: CondaCLIFixture):
     """Test basic conda pypi install functionality."""
     with tmp_env("python=3.11") as prefix:
-        out, err, rc = conda_cli(
-            "pypi",
-            "-p",
-            prefix,
-            "--yes",
-            "install",
-            "numpy",
-        )
+        with pytest.deprecated_call(match=r"`conda pypi install` for package installs"):
+            out, err, rc = conda_cli(
+                "pypi",
+                "-p",
+                prefix,
+                "--yes",
+                "install",
+                "numpy",
+            )
         assert rc == 0
 
 
@@ -36,14 +37,15 @@ def test_conda_pypi_install_package_conversion(
 ):
     """Test that PyPI packages are correctly converted and installed."""
     with tmp_env("python=3.11") as prefix:
-        out, err, rc = conda_cli(
-            "pypi",
-            "-p",
-            prefix,
-            "--yes",
-            "install",
-            pypi_spec,
-        )
+        with pytest.deprecated_call(match=r"`conda pypi install` for package installs"):
+            out, err, rc = conda_cli(
+                "pypi",
+                "-p",
+                prefix,
+                "--yes",
+                "install",
+                pypi_spec,
+            )
         assert rc == 0
         assert expected_in_output in out or "All requested packages already installed" in out
 
@@ -57,15 +59,16 @@ def test_conda_pypi_install_matchspec_parsing(tmp_env: TmpEnvFixture, conda_cli:
         ]
 
         for spec in test_specs:
-            out, err, rc = conda_cli(
-                "pypi",
-                "-p",
-                prefix,
-                "--yes",
-                "--dry-run",
-                "install",
-                spec,
-            )
+            with pytest.deprecated_call(match=r"`conda pypi install` for package installs"):
+                out, err, rc = conda_cli(
+                    "pypi",
+                    "-p",
+                    prefix,
+                    "--yes",
+                    "--dry-run",
+                    "install",
+                    spec,
+                )
             assert rc == 0, f"Failed to parse spec '{spec}'"
 
 
