@@ -80,10 +80,17 @@ def configure_parser(parser: _SubParsersAction) -> None:
         nargs="*",
         help="PyPI packages to install",
     )
-    install.add_argument(
+    target_env = install.add_mutually_exclusive_group()
+    target_env.add_argument(
         "-p",
         "--prefix",
         help="Full path to environment location (i.e. prefix).",
+        required=False,
+    )
+    target_env.add_argument(
+        "-n",
+        "--name",
+        help="Name of the conda environment.",
         required=False,
     )
     install.add_argument(
