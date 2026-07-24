@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from conda.exceptions import DryRunExit
 from conda.testing.fixtures import CondaCLIFixture, TmpEnvFixture
 
 
@@ -61,13 +62,7 @@ def test_conda_pypi_install_matchspec_parsing(tmp_env: TmpEnvFixture, conda_cli:
         for spec in test_specs:
             with pytest.deprecated_call(match=r"`conda pypi install` for package installs"):
                 out, err, rc = conda_cli(
-                    "pypi",
-                    "-p",
-                    prefix,
-                    "--yes",
-                    "--dry-run",
-                    "install",
-                    spec,
+                    "pypi", "-p", prefix, "--yes", "--dry-run", "install", spec, raises=DryRunExit
                 )
             assert rc == 0, f"Failed to parse spec '{spec}'"
 
@@ -111,7 +106,9 @@ def test_spec_normalization(
 ):
     with tmp_env("python=3.9", "pip", "pytest-cov") as prefix:
         for spec in ("pytest-cov", "pytest_cov", "PyTest-Cov"):
-            out, err, rc = conda_cli("pypi", "--dry-run", "-p", prefix, "--yes", "install", spec)
+            out, err, rc = conda_cli(
+                "pypi", "--dry-run", "-p", prefix, "--yes", "install", spec, raises=DryRunExit
+            )
             print(out)
             print(err, file=sys.stderr)
             assert rc == 0
@@ -133,7 +130,9 @@ def test_pyqt(
     installed_conda_specs: tuple[str],
 ):
     with tmp_env("python=3.9", "pip") as prefix:
-        out, err, rc = conda_cli("pypi", "-p", prefix, "--yes", "--dry-run", "install", pypi_spec)
+        out, err, rc = conda_cli(
+            "pypi", "-p", prefix, "--yes", "--dry-run", "install", pypi_spec, raises=DryRunExit
+        )
         print(out)
         print(err, file=sys.stderr)
         assert rc == 0
