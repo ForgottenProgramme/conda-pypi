@@ -15,6 +15,7 @@ from typing import Any
 from conda.exceptions import ArgumentError
 from conda.models.match_spec import MatchSpec
 from packaging.requirements import Requirement
+from packaging.utils import parse_wheel_filename
 
 from conda_pypi import __version__
 from conda_pypi.name_mapping import conda_to_pypi_name, pypi_to_conda_name
@@ -29,6 +30,18 @@ URL_LABEL_MAP: dict[str, tuple] = {
     "dev_url": ("source", "repository", "source code", "development", "github"),
     "doc_url": ("documentation", "docs"),
 }
+
+
+def build_number_from_wheel_filename(filename: str) -> int:
+    """Derive a conda build number from a wheel filename's optional build tag.
+
+    PEP 427 based. Only the leading integer is used as the conda
+    build number. A missing tag maps to ``0``.
+    """
+    _, _, build_tag, _ = parse_wheel_filename(filename)
+    if not build_tag:
+        return 0
+    return build_tag[0]
 
 
 def short_description(text: str) -> str:
@@ -156,6 +169,7 @@ class CondaMetadata:
         distribution: Distribution,
         pypi_to_conda_name_mapping: dict | None = None,
         channels: Iterable[str] = (),
+        build_number: int = 0,
     ):
         metadata = distribution.metadata
 
@@ -212,7 +226,7 @@ class CondaMetadata:
         version = getattr(distribution, "version", None) or distribution.metadata.get("version")
 
         package_record = PackageRecord(
-            build_number=0,
+            build_number=build_number,
             depends=depends,
             extras=extras,
             license=about["license"] or "",

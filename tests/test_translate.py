@@ -9,6 +9,7 @@ from conda_pypi import __version__
 from conda_pypi.translate import (
     CondaMetadata,
     FileDistribution,
+    build_number_from_wheel_filename,
     requires_to_conda,
     validate_name_mapping_format,
 )
@@ -298,3 +299,16 @@ def test_link_json_entry_points_are_parseable_by_conda():
         # Raises ValueError for "app [cli]" before this fix.
         command, module, func = parse_entry_point_def(entry_point)
         assert (command, module, func) == ("demo-script", "pkg.cli", "app")
+
+
+@pytest.mark.parametrize(
+    ("filename", "expected"),
+    [
+        ("pkg-1.0.0-py3-none-any.whl", 0),
+        ("pkg-1.0.0-1-py3-none-any.whl", 1),
+        ("pkg-1.0.0-1dev-py3-none-any.whl", 1),
+    ],
+)
+def test_build_number_from_wheel_filename(filename: str, expected: int):
+    """Use the leading digits of a wheel build tag; default to 0."""
+    assert build_number_from_wheel_filename(filename) == expected
