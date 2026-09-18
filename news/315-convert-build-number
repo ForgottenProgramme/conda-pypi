@@ -1,6 +1,6 @@
 ### Enhancements
 
-* Derive `conda pypi convert` build numbers from the wheel filename build tag and add `--build-number` to override them. (#315)
+* Derive `conda pypi convert` build numbers from the wheel filename build tag and add `--build-number` to override them. (#315 via #529)
 
 ### Bug fixes
 
