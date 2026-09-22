@@ -15,7 +15,6 @@ from typing import Any
 from conda.exceptions import ArgumentError
 from conda.models.match_spec import MatchSpec
 from packaging.requirements import Requirement
-from packaging.utils import parse_wheel_filename
 
 from conda_pypi import __version__
 from conda_pypi.name_mapping import conda_to_pypi_name, pypi_to_conda_name
@@ -32,16 +31,18 @@ URL_LABEL_MAP: dict[str, tuple] = {
 }
 
 
-def build_number_from_wheel_filename(filename: str) -> int:
-    """Derive a conda build number from a wheel filename's optional build tag.
+def build_number_from_build_tag(build_tag: str | None) -> int:
+    """Derive a conda build number from an installer wheel ``build_tag``.
 
-    PEP 427 based. Only the leading integer is used as the conda
-    build number. A missing tag maps to ``0``.
+    PEP 427 tags start with digits and may have a string remainder. Only the
+    leading integer is used. ``None`` maps to ``0``.
     """
-    _, _, build_tag, _ = parse_wheel_filename(filename)
     if not build_tag:
         return 0
-    return build_tag[0]
+    match = re.match(r"(\d+)", build_tag)
+    if match is None:
+        return 0
+    return int(match.group(1))
 
 
 def short_description(text: str) -> str:

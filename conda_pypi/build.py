@@ -29,7 +29,7 @@ from installer.utils import parse_wheel_filename  # noqa: TID253
 from conda_pypi import dependencies, installer, paths
 from conda_pypi.conda_build_utils import PathType, sha256_checksum
 from conda_pypi.license_files import copy_into_info_licenses
-from conda_pypi.translate import CondaMetadata, build_number_from_wheel_filename
+from conda_pypi.translate import CondaMetadata, build_number_from_build_tag
 from conda_pypi.utils import sha256_as_base64url
 
 log = logging.getLogger(__name__)
@@ -179,7 +179,7 @@ def build_conda(
         # straightforward to write or find a WheelDistribution() to grab these
         # files from the wheel archive directly, instead of PathDistribution():
         if build_number is None:
-            build_number = build_number_from_wheel_filename(whl.name)
+            build_number = build_number_from_build_tag(parsed.build_tag)
 
         metadata = CondaMetadata.from_distribution(
             PathDistribution(dist_info),

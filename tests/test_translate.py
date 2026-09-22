@@ -9,7 +9,7 @@ from conda_pypi import __version__
 from conda_pypi.translate import (
     CondaMetadata,
     FileDistribution,
-    build_number_from_wheel_filename,
+    build_number_from_build_tag,
     requires_to_conda,
     validate_name_mapping_format,
 )
@@ -302,13 +302,14 @@ def test_link_json_entry_points_are_parseable_by_conda():
 
 
 @pytest.mark.parametrize(
-    ("filename", "expected"),
+    ("build_tag", "expected"),
     [
-        ("pkg-1.0.0-py3-none-any.whl", 0),
-        ("pkg-1.0.0-1-py3-none-any.whl", 1),
-        ("pkg-1.0.0-1dev-py3-none-any.whl", 1),
+        (None, 0),
+        ("1", 1),
+        ("1dev", 1),
+        ("7ks", 7),
     ],
 )
-def test_build_number_from_wheel_filename(filename: str, expected: int):
+def test_build_number_from_build_tag(build_tag: str | None, expected: int):
     """Use the leading digits of a wheel build tag; default to 0."""
-    assert build_number_from_wheel_filename(filename) == expected
+    assert build_number_from_build_tag(build_tag) == expected
